@@ -16,22 +16,25 @@
 - **Seed data (`data/projects.ts`):** in place. Typed `Project` model, `TYPES`/`STATUSES`
   vocab, and the four seed projects. This is the single data source the garage reads from.
   It carries `cameraPose` / `engineAnchor` fields, stubbed until Phase 0 sets them per car.
-- **3D garage — Phase 0 (greybox) done.** R3F + Vite + TS app scaffolded at the folder
-  root (`src/App.tsx`). Working: establishing street shot, two rows of cube "cars" from
-  `data/projects.ts`, hover highlight, click-engine → ~1s camera glide to a 3/4 pose →
-  `<Html>` popup with that project's data, Escape / floor-click returns to the
-  establishing shot. Camera-on-rails via a per-frame lerp (`CameraRig`). Dev on port 5180
-  (5173 is Ezra's work server). `npm run dev` / `npm run build` both clean.
-- **Next: Phase 1 (dress).** Swap cube cars for low-poly models, light for mood; then
-  Phase 2 atmosphere (rain, bloom, wet floor, lofi bed), Phase 3 content + a11y fallback.
-- Folder is **not a git repo** yet; init before the first commit.
+- **Vision pivoted (2026-07-06):** from an interior-only garage to the **night-time
+  exterior tuning-shop** approach above (street → entrance → car). See the vision and build
+  plan sections. Reusable tech from the first build carries over (camera-on-rails lerp,
+  low-poly `CarModel`, neon `<Html>` popup, bloom + reflective floor).
+- **3D app stack in place.** R3F + Vite + TS at the folder root, split into `layout.ts`,
+  `App.tsx`, `Car*.tsx`, `ProjectPopup.tsx`. Dev on port 5180 (5173 is Ezra's work
+  server). `npm run dev` / `npm run build` clean. Committed on `main`, local-only.
+- **Current work:** rebuilding the scene around the street/shop/interior layout (re-greybox
+  for the new vision), then re-dressing.
+- Repo is initialized (git, local only — no remote yet).
 
 ## What this project is
 
-The home for everything Ezra wants to build someday: an immersive **3D garage** you move
-around inside, where **each car is a project**. A chill late-night garage that is the star
-way to browse the backlog. Projects live in `data/projects.ts`; the scene reads from it, so
-adding a project means adding a car. The rest of this file is the build brief.
+The home for everything Ezra wants to build someday, staged as a **night-time JDM tuning
+shop** you approach from the street. You start across the road looking at the shop; you
+click the open garage door to move up to the entrance; inside, **each car is a project**
+you click for its details. Projects live in `data/projects.ts`; the scene reads from it, so
+adding a project means adding a car inside the garage. The rest of this file is the build
+brief.
 
 ## Current contents of this folder
 
@@ -39,29 +42,43 @@ adding a project means adding a car. The rest of this file is the build brief.
 - `data/projects.ts` — the single data source (typed `Project` model, `TYPES`/`STATUSES`
   vocab, seed projects). Salvaged from the retired backlog.
 
-## The vision (3D garage)
+## The vision (night-time tuning shop)
 
-An interactive, almost-3D **chill late-night garage** you can move around inside. The
-establishing shot looks in from a rainy neon-lit street at an open garage. Inside: a loft
-at the back, and under the loft a couch with a TV area and a rug. Along both walls sit
-cars with their engine bays open. **Clicking on an engine glides the camera to the front
-of that car and a popup rises out of the engine bay showing that project's details.**
+Reference: a real JDM tuning shop at night (think Advance Technical Factory) — a
+corrugated-metal shop building with a lit sign, an open roll-up garage door glowing warm
+from inside, vending machines by the door, cars parked out on the street, an apartment
+block behind, power lines overhead, wet asphalt under street lamps and neon. Stylized
+homage, not a replica.
 
-Each car is a project (pulled from the Future Builds backlog). It should feel like a place
-and a mood, not a game or a normal website. Chill, rainy, neon, lofi.
+The experience is a **two-hop camera journey**:
+
+1. **Street (establishing).** Camera sits across the road at an angle, taking in the whole
+   shop and its surroundings under night ambient light. The open garage door reads as a
+   warm glowing invitation.
+2. **Entrance.** Clicking the open garage door glides the camera across the street and up
+   to the doorway (~1s ease), now looking into the garage.
+3. **Cars.** Inside sit the project cars. Clicking a car lights it up and rises a neon
+   `<Html>` popup with that project's details; the camera holds at the entrance. Escape
+   backs out (car → deselect, then entrance → street).
+
+Each **inside** car is a project (from `data/projects.ts`). The cars on the street are set
+dressing only, not clickable. It should feel like a place and a mood — chill, rainy, neon,
+lofi — not a game or a normal website.
 
 ## What it is underneath
 
-An interactive 3D web experience (a "3D room" / diorama), not a page. It breaks into:
-scene/layout, assets/models, lighting+mood, camera system, interaction (raycast/hotspots),
-HTML overlays (the popup), atmosphere (rain, neon, wet floor), and audio.
+An interactive 3D web experience (a diorama you look into), not a page. It breaks into:
+scene/layout (street + shop + interior), assets/models, lighting+mood (night ambient, warm
+interior spill, neon), camera system, interaction (raycast hotspots: the door + the cars),
+HTML overlays (the popup), atmosphere (rain, neon, wet asphalt), and audio.
 
 ## The single most important design decision: camera on rails
 
-**Do not build a free-roam camera.** One establishing shot plus one saved camera pose per
-car. Clicking an engine tweens the camera to that pose (about 1s ease) and fades in the
-popup; closing returns to the establishing shot. This one choice makes it cinematic,
-controllable, and dramatically less work. Resist the urge to make it a walk-around.
+**Do not build a free-roam camera.** The whole thing runs on a handful of saved poses —
+`STREET`, `ENTRANCE`, and (if ever needed) per-car — that the camera tweens between (~1s
+ease). Clicking the door goes street → entrance; clicking a car pops its card without
+moving; Escape walks back out. This one choice makes it cinematic, controllable, and
+dramatically less work. Resist the urge to make it a walk-around.
 
 ## Recommended stack
 
@@ -86,9 +103,10 @@ Make the final call in Phase 0. Greybox first either way.
 
 ## Aesthetic direction
 
-Late-night JDM garage. Deep near-black navy base, a warm tungsten pool of light in the
-loft, neon magenta / cyan / amber signage, wet asphalt and reflections out on the street,
-haze and rain streaks. Stylized, not photoreal. A looping **lofi hiphop + rain audio bed**
+Late-night JDM street. Deep near-black navy base, a warm tungsten glow spilling out of the
+open garage door, neon magenta / cyan / amber signage on the shop and surrounding
+buildings, lit apartment windows, street-lamp pools, wet asphalt and reflections, haze and
+rain streaks. Stylized, not photoreal. A looping **lofi hiphop + rain audio bed**
 is core to the mood and cheap to add (a looping `<audio>` element started on first user
 interaction so autoplay policies do not block it). Reference feel: Initial D night stages,
 Tokyo backstreet garages, chill synthwave garage renders.
@@ -107,13 +125,21 @@ engine bay. Strategy:
 
 ## Build plan (phased, greybox first)
 
-- **Phase 0 — Greybox.** Whole scene in primitives (cubes for cars, a plane for the loft).
-  Nail the layout, the click-engine to camera-glide to popup interaction, and the data
-  wiring. Proves the feel in about a day, before spending a minute on art.
-- **Phase 1 — Dress.** Swap primitives for low-poly models; light it for mood.
-- **Phase 2 — Atmosphere.** Rain, neon bloom, wet reflections, the lofi + rain audio bed.
+- **Phase 0 — Greybox.** Whole scene in primitives (boxes for the shop/buildings/cars, a
+  plane for the street). Nail the layout, the street → entrance → car-popup camera flow,
+  and the data wiring. Proves the feel before spending a minute on art.
+- **Phase 1 — Dress.** Swap primitives for low-poly models; light it for mood (warm door
+  spill, neon signage, street lamps, lit windows).
+- **Phase 2 — Atmosphere.** Rain, neon bloom, wet asphalt reflections, the lofi + rain
+  audio bed.
 - **Phase 3 — Content + polish.** Each car's popup pulls from the project data; tune mobile
   and performance (LOD, Draco, texture compression); add the accessible fallback.
+
+**Status note:** an earlier interior-only greybox (cars along the walls of a room, loft +
+couch) was built and dressed before the vision changed to this exterior street approach.
+Its reusable parts — camera-on-rails lerp, low-poly `CarModel`, the neon `<Html>` popup,
+bloom + reflective-floor setup — carry straight over; the surrounding scene is being
+rebuilt around the street → shop → interior layout.
 
 ## Data model (cars = projects)
 
@@ -125,11 +151,13 @@ projects and the `TYPES` / `STATUSES` vocabulary already live there. Phase 0 fil
 
 ## Interaction spec
 
-- Establishing shot on load, looking in from the street.
-- Hover an engine: subtle highlight plus pointer cursor.
-- Click an engine: camera eases (~1s) to that car's saved pose; popup fades in at the
-  engine bay; slightly dim the rest of the scene.
-- Close, click away, or Escape: popup out, camera returns to the establishing shot.
+- **Street shot on load**, across the road at an angle; the open garage door glows.
+- Hover the door or a car: subtle highlight plus pointer cursor.
+- Click the door: camera eases (~1s) to the `ENTRANCE` pose, looking into the garage.
+- Click a car (at the entrance): it lights up, its neon popup rises, rest of the scene
+  dims slightly; camera holds at the entrance.
+- Escape / click away: step back out — a focused car deselects first, then entrance
+  returns to the street shot.
 
 ## Performance and accessibility floor
 
