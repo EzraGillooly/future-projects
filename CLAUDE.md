@@ -23,8 +23,15 @@
 - **3D app stack in place.** R3F + Vite + TS at the folder root, split into `layout.ts`,
   `App.tsx`, `Car*.tsx`, `ProjectPopup.tsx`. Dev on port 5180 (5173 is Ezra's work
   server). `npm run dev` / `npm run build` clean. Committed on `main`, local-only.
-- **Current work:** rebuilding the scene around the street/shop/interior layout (re-greybox
-  for the new vision), then re-dressing.
+- **Built + verified (new vision):** street → click door → entrance → click car →
+  camera hops to an angled 3/4 view over that car's open hood, info card rises from the
+  engine bay. Cars park rear-to-wall, engines to the aisle. Interior magenta/cyan neon,
+  wet reflective asphalt, bloom, vignette, night rain. Affordances: car hover-lift, popup
+  fade/rise, contextual on-screen back button (+ Esc). Files: `layout.ts` (STREET /
+  ENTRANCE + per-car poses), `App.tsx` (nav state + overlay), `Building.tsx`, `CarModel` /
+  `Car` / `StreetCar`, `Rain.tsx`, `ProjectPopup.tsx`.
+- **Deferred:** the lofi + rain **audio bed** (Phase 2) — needs a real loop file to bundle;
+  scaffold only when the asset exists. Photoreal/GLB car models remain a later asset task.
 - Repo is initialized (git, local only — no remote yet).
 
 ## What this project is
