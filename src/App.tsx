@@ -26,7 +26,8 @@ function Scene() {
   const [view, setView] = useState<"street" | "entrance">("street");
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const pose = view === "street" ? STREET : ENTRANCE;
+  const activeCar = cars.find((c) => c.project.id === activeId) ?? null;
+  const pose = activeCar ? activeCar.cameraPose : view === "street" ? STREET : ENTRANCE;
   const atEntrance = view === "entrance";
 
   // Escape steps back out: focused car → deselect, then entrance → street.

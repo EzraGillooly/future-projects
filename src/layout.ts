@@ -20,28 +20,39 @@ export const ENTRANCE: CameraPose = {
 };
 
 // --- Interior project cars --------------------------------------------------
-// Cars park inside the garage facing the door (+Z). CarModel's nose is +X, so a
-// -90° yaw points it at the entrance.
-const FACE_DOOR = -Math.PI / 2;
-
+// Cars park along the two side walls, rear to the wall, engine bay (nose)
+// pointing into the central aisle. CarModel's nose is +X: left-wall cars keep
+// facing 0 (nose toward centre), right-wall cars yaw 180°.
 export interface CarSlot {
   project: Project;
   position: THREE.Vector3;
   facing: number;
+  cameraPose: CameraPose; // angled 3/4 view into the open hood
 }
 
-// Two staggered rows so all cars stay visible from the entrance.
-const CAR_SPOTS: [number, number][] = [
-  [-2.4, -3.2],
-  [2.4, -3.2],
-  [-2.4, -6.2],
-  [2.4, -6.2],
+// side: -1 left wall, +1 right wall. z runs deeper into the shop.
+const CAR_SPOTS: { side: -1 | 1; z: number }[] = [
+  { side: -1, z: -2.6 },
+  { side: 1, z: -2.6 },
+  { side: -1, z: -6.0 },
+  { side: 1, z: -6.0 },
 ];
+
+const WALL_PARK = 3.5; // |x| of a parked car's centre
 
 export function buildCarSlots(): CarSlot[] {
   return PROJECTS.map((project, i) => {
-    const [x, z] = CAR_SPOTS[i % CAR_SPOTS.length];
-    return { project, position: new THREE.Vector3(x, 0, z), facing: FACE_DOOR };
+    const { side, z } = CAR_SPOTS[i % CAR_SPOTS.length];
+    const x = side * WALL_PARK;
+    const facing = side === -1 ? 0 : Math.PI; // nose toward the aisle
+    const dir = -side; // +1 for left car (nose +X), -1 for right car (nose -X)
+    // Camera glides to a spot out in the aisle, in front of the nose and raised,
+    // angled toward the door so it looks down into the open hood.
+    const cameraPose: CameraPose = {
+      position: new THREE.Vector3(x + dir * 4.4, 2.15, z + 2.3),
+      target: new THREE.Vector3(x + dir * 0.6, 0.9, z),
+    };
+    return { project, position: new THREE.Vector3(x, 0, z), facing, cameraPose };
   });
 }
 

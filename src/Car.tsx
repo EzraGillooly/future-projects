@@ -50,7 +50,7 @@ export function Car({
       </group>
 
       {active && (
-        <Html position={[0.7, 2.1, 0]} center distanceFactor={9} zIndexRange={[100, 0]}>
+        <Html position={[0.9, 1.5, 0]} center distanceFactor={6} zIndexRange={[100, 0]}>
           <ProjectPopup project={slot.project} />
         </Html>
       )}

@@ -155,6 +155,16 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <meshStandardMaterial color="#1a1e2e" roughness={0.9} />
       </mesh>
 
+      {/* Interior neon accent strips along the side walls */}
+      <mesh position={[-SHOP_W / 2 + 0.15, 3.2, -SHOP_D / 2]}>
+        <boxGeometry args={[0.05, 0.12, SHOP_D - 1]} />
+        <meshStandardMaterial color="#ff4fd8" emissive="#ff4fd8" emissiveIntensity={2.4} toneMapped={false} />
+      </mesh>
+      <mesh position={[SHOP_W / 2 - 0.15, 3.2, -SHOP_D / 2]}>
+        <boxGeometry args={[0.05, 0.12, SHOP_D - 1]} />
+        <meshStandardMaterial color="#4fd8ff" emissive="#4fd8ff" emissiveIntensity={2.4} toneMapped={false} />
+      </mesh>
+
       {/* Shop sign above the door */}
       <mesh position={[0, DOOR_H + 0.55, 0.16]}>
         <boxGeometry args={[3.6, 0.5, 0.06]} />
