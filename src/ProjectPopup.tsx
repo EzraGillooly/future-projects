@@ -15,6 +15,7 @@ export function ProjectPopup({ project }: { project: Project }) {
         fontFamily: "system-ui, sans-serif",
         backdropFilter: "blur(8px)",
         pointerEvents: "none",
+        animation: "popIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both",
       }}
     >
       <div

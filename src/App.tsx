@@ -2,10 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { MeshReflectorMaterial } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
-import { STREET, ENTRANCE, buildCarSlots, STREET_CARS, type CameraPose } from "./layout";
+import { STREET, ENTRANCE, buildCarSlots, STREET_CARS, type CameraPose, type CarSlot } from "./layout";
 import { Car } from "./Car";
 import { StreetCar } from "./StreetCar";
 import { Scene3D } from "./Building";
+import { Rain } from "./Rain";
+
+type View = "street" | "entrance";
 
 // Camera on rails: lerp position + look target toward the active pose each frame.
 function CameraRig({ pose }: { pose: CameraPose }) {
@@ -21,30 +24,23 @@ function CameraRig({ pose }: { pose: CameraPose }) {
   return null;
 }
 
-function Scene() {
-  const cars = useMemo(buildCarSlots, []);
-  const [view, setView] = useState<"street" | "entrance">("street");
-  const [activeId, setActiveId] = useState<string | null>(null);
-
-  const activeCar = cars.find((c) => c.project.id === activeId) ?? null;
-  const pose = activeCar ? activeCar.cameraPose : view === "street" ? STREET : ENTRANCE;
+function Scene({
+  cars,
+  view,
+  activeCar,
+  onEnter,
+  onSelect,
+  onBack,
+}: {
+  cars: CarSlot[];
+  view: View;
+  activeCar: CarSlot | null;
+  onEnter: () => void;
+  onSelect: (id: string) => void;
+  onBack: () => void;
+}) {
   const atEntrance = view === "entrance";
-
-  // Escape steps back out: focused car → deselect, then entrance → street.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (activeId) setActiveId(null);
-      else if (view === "entrance") setView("street");
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [activeId, view]);
-
-  const backOut = () => {
-    if (activeId) setActiveId(null);
-    else if (view === "entrance") setView("street");
-  };
+  const pose = activeCar ? activeCar.cameraPose : view === "street" ? STREET : ENTRANCE;
 
   return (
     <>
@@ -59,23 +55,23 @@ function Scene() {
       <pointLight position={[6, 4.6, 7]} intensity={26} color="#fff0cf" distance={18} />
 
       {/* Wet asphalt: one big reflective plane under the whole scene */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} onClick={backOut}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} onClick={onBack}>
         <planeGeometry args={[60, 60]} />
         <MeshReflectorMaterial
           resolution={1024}
-          mirror={0.5}
-          mixStrength={1.1}
-          blur={[300, 100]}
-          roughness={0.9}
+          mirror={0.6}
+          mixStrength={1.3}
+          blur={[300, 90]}
+          roughness={0.85}
           depthScale={1}
           minDepthThreshold={0.4}
           maxDepthThreshold={1.2}
           color="#06070f"
-          metalness={0.6}
+          metalness={0.65}
         />
       </mesh>
 
-      <Scene3D onEnter={() => setView("entrance")} doorLive={view === "street"} />
+      <Scene3D onEnter={onEnter} doorLive={view === "street"} />
 
       {STREET_CARS.map((d, i) => (
         <StreetCar key={i} position={d.position} facing={d.facing} color={d.color} />
@@ -86,11 +82,13 @@ function Scene() {
           key={slot.project.id}
           slot={slot}
           interactive={atEntrance}
-          active={activeId === slot.project.id}
-          dimmed={activeId !== null && activeId !== slot.project.id}
-          onSelect={() => setActiveId(slot.project.id)}
+          active={activeCar?.project.id === slot.project.id}
+          dimmed={activeCar !== null && activeCar.project.id !== slot.project.id}
+          onSelect={() => onSelect(slot.project.id)}
         />
       ))}
+
+      <Rain />
 
       <EffectComposer>
         <Bloom mipmapBlur intensity={0.85} luminanceThreshold={0.6} luminanceSmoothing={0.3} />
@@ -100,16 +98,91 @@ function Scene() {
   );
 }
 
-export function App() {
+// On-screen back affordance (Escape isn't discoverable).
+function BackHint({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <Canvas
-      shadows
-      camera={{ position: STREET.position.toArray(), fov: 45 }}
-      style={{ position: "fixed", inset: 0 }}
+    <button
+      onClick={onClick}
+      style={{
+        position: "fixed",
+        left: "50%",
+        bottom: 28,
+        transform: "translateX(-50%)",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "9px 16px",
+        borderRadius: 999,
+        border: "1px solid rgba(143, 214, 255, 0.35)",
+        background: "rgba(10, 12, 24, 0.6)",
+        backdropFilter: "blur(8px)",
+        color: "#dfe8ff",
+        font: "500 13px system-ui, sans-serif",
+        letterSpacing: "0.02em",
+        cursor: "pointer",
+        opacity: 0.85,
+        animation: "hintIn 0.3s ease-out both",
+      }}
     >
-      <color attach="background" args={["#04050b"]} />
-      <fog attach="fog" args={["#04050b", 20, 48]} />
-      <Scene />
-    </Canvas>
+      <span aria-hidden>←</span> {label}
+      <kbd
+        style={{
+          marginLeft: 4,
+          padding: "1px 6px",
+          borderRadius: 5,
+          border: "1px solid rgba(255,255,255,0.18)",
+          fontSize: 11,
+          opacity: 0.7,
+        }}
+      >
+        Esc
+      </kbd>
+    </button>
+  );
+}
+
+export function App() {
+  const cars = useMemo(buildCarSlots, []);
+  const [view, setView] = useState<View>("street");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const activeCar = cars.find((c) => c.project.id === activeId) ?? null;
+
+  const backOut = () => {
+    if (activeId) setActiveId(null);
+    else if (view === "entrance") setView("street");
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") backOut();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  const canGoBack = activeId !== null || view === "entrance";
+
+  return (
+    <>
+      <Canvas
+        shadows
+        camera={{ position: STREET.position.toArray(), fov: 45 }}
+        style={{ position: "fixed", inset: 0 }}
+      >
+        <color attach="background" args={["#04050b"]} />
+        <fog attach="fog" args={["#04050b", 20, 48]} />
+        <Scene
+          cars={cars}
+          view={view}
+          activeCar={activeCar}
+          onEnter={() => setView("entrance")}
+          onSelect={setActiveId}
+          onBack={backOut}
+        />
+      </Canvas>
+      {canGoBack && (
+        <BackHint label={activeId ? "Back to garage" : "Back to street"} onClick={backOut} />
+      )}
+    </>
   );
 }
