@@ -34,6 +34,16 @@
   scaffold only when the asset exists. Photoreal/GLB car models remain a later asset task.
 - Repo is initialized (git, local only — no remote yet).
 
+### Next up (Ezra, 2026-07-06)
+
+1. **Level up the graphics** — the current look is a stylized greybox-plus-dress. Push
+   fidelity: better materials/lighting, real low-poly `.glb` car + shop assets, richer
+   night atmosphere. This is the main thrust of the next session.
+2. **Street view from the LEFT side of the garage, not the right.** The `STREET` pose in
+   `layout.ts` is currently at `+X` (right of the door, looking across). Move it to `-X`
+   (mirror the position) so the establishing shot looks in from the left, and re-check the
+   street-car / lamp framing against the new angle.
+
 ## What this project is
 
 The home for everything Ezra wants to build someday, staged as a **night-time JDM tuning
