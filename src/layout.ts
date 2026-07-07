@@ -10,8 +10,8 @@ export interface CameraPose {
 }
 
 export const STREET: CameraPose = {
-  position: new THREE.Vector3(-6, 2.3, 11),
-  target: new THREE.Vector3(0, 1.7, -1),
+  position: new THREE.Vector3(-6, 3.1, 12),
+  target: new THREE.Vector3(0, 1.4, -2),
 };
 
 export const ENTRANCE: CameraPose = {

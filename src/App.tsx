@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { STREET, ENTRANCE, buildCarSlots, STREET_CARS, type CameraPose, type CarSlot } from "./layout";
 import { makeRoadTexture } from "./textures";
 import { Car } from "./Car";
-import { GLBModel } from "./Vehicle";
+import { GLBModel, PassingCar } from "./Vehicle";
 import { Scene3D } from "./Building";
 import { Rain } from "./Rain";
 
@@ -101,6 +101,10 @@ function Scene({
           length={2.1}
         />
       ))}
+
+      {/* Traffic passing on the street */}
+      <PassingCar url="/models/nissan-gtr.glb" z={6.2} speed={10} from={-32} to={32} />
+      <PassingCar url="/models/nissan-180sx.glb" z={8} speed={7} from={34} to={-34} />
 
       {cars.map((slot) => (
         <Car

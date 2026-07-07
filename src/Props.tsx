@@ -95,6 +95,35 @@ export function TrashCan({ position }: { position: Vec3 }) {
   );
 }
 
+export function Manhole({ position }: { position: Vec3 }) {
+  return (
+    <group position={position} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh>
+        <circleGeometry args={[0.42, 24]} />
+        <meshStandardMaterial color="#0c0e14" metalness={0.6} roughness={0.7} polygonOffset polygonOffsetFactor={-1} />
+      </mesh>
+      <mesh position={[0, 0, 0.001]}>
+        <ringGeometry args={[0.3, 0.36, 24]} />
+        <meshStandardMaterial color="#20242e" metalness={0.5} roughness={0.7} polygonOffset polygonOffsetFactor={-2} />
+      </mesh>
+    </group>
+  );
+}
+
+// Zebra crossing: a row of white stripes across the road (along +Z).
+export function Crosswalk({ x, z }: { x: number; z: number }) {
+  return (
+    <group position={[x, 0.02, z]}>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <mesh key={i} position={[-1.4 + i * 0.56, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.34, 2.6]} />
+          <meshStandardMaterial color="#c9ccd6" emissive="#3a3d44" emissiveIntensity={0.3} roughness={0.8} polygonOffset polygonOffsetFactor={-1} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 // A striped shop awning: a shallow slanted slab tilted out over the storefront.
 export function Awning({ position, width }: { position: Vec3; width: number }) {
   const stripes = Math.max(3, Math.round(width / 0.7));

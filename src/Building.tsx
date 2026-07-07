@@ -8,7 +8,7 @@ import {
   makeBannerTexture,
   makeCorrugatedTexture,
 } from "./textures";
-import { ACUnit, Pipe, Bush, TrashCan, Awning, Puddle } from "./Props";
+import { ACUnit, Pipe, Bush, TrashCan, Awning, Puddle, Manhole, Crosswalk } from "./Props";
 import { CityBuildings } from "./CityBuildings";
 
 // A glowing vertical neon signboard mounted flat against a wall.
@@ -330,6 +330,11 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <boxGeometry args={[60, 0.18, 0.16]} />
         <meshStandardMaterial color="#4a4f60" roughness={0.9} />
       </mesh>
+
+      {/* Ground detail: manholes + a crosswalk */}
+      <Manhole position={[-3, 0.02, 5.5]} />
+      <Manhole position={[7.5, 0.02, 7]} />
+      <Crosswalk x={-1} z={7.6} />
 
       {/* Puddles catching the neon (wet night) */}
       <Puddle position={[-2, 0.015, 3.2]} scale={[1.6, 1.0]} rotation={0.3} />
