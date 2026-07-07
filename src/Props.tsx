@@ -1,7 +1,40 @@
+import { useMemo } from "react";
+import { makePuddleAlpha } from "./textures";
+
 // Small self-contained street props (pure geometry) that make the scene feel
 // lived-in: AC units, drainpipes, bushes, trash cans, a storefront awning.
 
 type Vec3 = [number, number, number];
+
+// A wet puddle: a low-roughness metallic patch that reflects the neon
+// environment. Soft alpha edge blends it into the battered asphalt.
+export function Puddle({
+  position,
+  scale = [1, 1],
+  rotation = 0,
+}: {
+  position: Vec3;
+  scale?: [number, number];
+  rotation?: number;
+}) {
+  const alpha = useMemo(() => makePuddleAlpha(), []);
+  return (
+    <mesh position={position} rotation={[-Math.PI / 2, 0, rotation]} scale={[scale[0], scale[1], 1]}>
+      <circleGeometry args={[1, 24]} />
+      <meshStandardMaterial
+        color="#090c15"
+        metalness={1}
+        roughness={0.08}
+        envMapIntensity={2.2}
+        alphaMap={alpha}
+        transparent
+        depthWrite={false}
+        polygonOffset
+        polygonOffsetFactor={-2}
+      />
+    </mesh>
+  );
+}
 
 export function ACUnit({ position, rotation = [0, 0, 0] }: { position: Vec3; rotation?: Vec3 }) {
   return (

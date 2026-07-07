@@ -8,7 +8,7 @@ import {
   makeBannerTexture,
   makeCorrugatedTexture,
 } from "./textures";
-import { ACUnit, Pipe, Bush, TrashCan, Awning } from "./Props";
+import { ACUnit, Pipe, Bush, TrashCan, Awning, Puddle } from "./Props";
 import { CityBuildings } from "./CityBuildings";
 
 // A glowing vertical neon signboard mounted flat against a wall.
@@ -330,6 +330,13 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <boxGeometry args={[60, 0.18, 0.16]} />
         <meshStandardMaterial color="#4a4f60" roughness={0.9} />
       </mesh>
+
+      {/* Puddles catching the neon (wet night) */}
+      <Puddle position={[-2, 0.015, 3.2]} scale={[1.6, 1.0]} rotation={0.3} />
+      <Puddle position={[4.5, 0.015, 4.2]} scale={[2.1, 1.3]} rotation={-0.4} />
+      <Puddle position={[-6.5, 0.015, 5]} scale={[1.4, 0.9]} rotation={0.1} />
+      <Puddle position={[1.5, 0.015, 7]} scale={[2.4, 1.2]} rotation={0.5} />
+      <Puddle position={[9, 0.015, 3.4]} scale={[1.3, 0.9]} rotation={-0.2} />
 
       {/* Centre-line dashes running ALONG the street (left-to-right) */}
       {Array.from({ length: 13 }).map((_, i) => (

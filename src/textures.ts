@@ -281,6 +281,22 @@ export function makeRoadTexture(seed = 5): THREE.CanvasTexture {
   return tex;
 }
 
+// Soft-edged blob (radial alpha) for puddle shapes so they melt into the road.
+export function makePuddleAlpha(): THREE.CanvasTexture {
+  const s = 128;
+  const cvs = document.createElement("canvas");
+  cvs.width = cvs.height = s;
+  const ctx = cvs.getContext("2d")!;
+  const g = ctx.createRadialGradient(s / 2, s / 2, 4, s / 2, s / 2, s / 2);
+  g.addColorStop(0, "#ffffff");
+  g.addColorStop(0.6, "#ffffff");
+  g.addColorStop(1, "#000000");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(cvs);
+  return tex;
+}
+
 // Corrugated metal siding (vertical ribs) for the garage front.
 export function makeCorrugatedTexture(): THREE.CanvasTexture {
   const s = 256;
