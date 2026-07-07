@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { STREET, ENTRANCE, buildCarSlots, STREET_CARS, type CameraPose, type CarSlot } from "./layout";
 import { makeRoadTexture } from "./textures";
 import { Car } from "./Car";
-import { StreetCar } from "./StreetCar";
+import { GLBModel } from "./Vehicle";
 import { Scene3D } from "./Building";
 import { Rain } from "./Rain";
 
@@ -93,7 +93,13 @@ function Scene({
       <Scene3D onEnter={onEnter} doorLive={view === "street"} />
 
       {STREET_CARS.map((d, i) => (
-        <StreetCar key={i} position={d.position} facing={d.facing} color={d.color} />
+        <GLBModel
+          key={i}
+          url="/models/motorcycle.glb"
+          position={d.position}
+          rotation={[0, d.facing, 0]}
+          length={2.1}
+        />
       ))}
 
       {cars.map((slot) => (
