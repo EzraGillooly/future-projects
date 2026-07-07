@@ -10,6 +10,7 @@ import {
 } from "./textures";
 import { ACUnit, Pipe, Bush, TrashCan, Awning, Puddle, Manhole, Crosswalk } from "./Props";
 import { CityBuildings } from "./CityBuildings";
+import { GLBModel } from "./Vehicle";
 
 // A glowing vertical neon signboard mounted flat against a wall.
 function NeonSign({
@@ -351,19 +352,20 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         </mesh>
       ))}
 
-      {/* Street lamp posts, pushed to the frame edges */}
-      {[-9.5, 9.5].map((x) => (
-        <group key={x} position={[x, 0, 8]}>
-          <mesh position={[0, 2.5, 0]}>
-            <cylinderGeometry args={[0.08, 0.08, 5, 8]} />
-            <meshStandardMaterial color="#0a0c14" />
-          </mesh>
-          <mesh position={[0, 5, 0]}>
-            <boxGeometry args={[0.5, 0.2, 0.5]} />
-            <meshStandardMaterial color="#fff4d6" emissive="#ffdf9e" emissiveIntensity={2.5} toneMapped={false} />
-          </mesh>
+      {/* Street lamps (real models) + a warm glow at each head */}
+      {[-8, 6].map((x) => (
+        <group key={x}>
+          <GLBModel url="/models/streetlight.glb" position={[x, 0, 2.7]} rotation={[0, x < 0 ? -Math.PI / 2 : Math.PI / 2, 0]} height={6} />
+          <pointLight position={[x, 5.4, 3.5]} intensity={22} color="#ffe6b0" distance={16} />
         </group>
       ))}
+
+      {/* Alley clutter by the left building: dumpster, trash bags, litter */}
+      <GLBModel url="/models/dumpster.glb" position={[-7.6, 0, 1.7]} rotation={[0, Math.PI / 2, 0]} length={2.4} />
+      <GLBModel url="/models/trash-bag.glb" position={[-6.4, 0, 1.5]} rotation={[0, 0.6, 0]} height={0.7} />
+      <GLBModel url="/models/trash-bag.glb" position={[-6.1, 0, 2.1]} rotation={[0, -1.2, 0]} height={0.62} />
+      <GLBModel url="/models/debris-papers.glb" position={[-5.4, 0.02, 2.4]} rotation={[0, 0.4, 0]} length={0.8} />
+      <GLBModel url="/models/debris-papers.glb" position={[2.2, 0.02, 6.4]} rotation={[0, 1.3, 0]} length={0.7} />
     </group>
   );
 }

@@ -3,21 +3,36 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
+// Per-model yaw correction so every vehicle's nose points +X at rotation 0
+// (the car models ship facing along Z). Callers then use semantic rotation
+// (facing / travel direction) without worrying about native orientation.
+const MODEL_YAW: Record<string, number> = {
+  "/models/mazda-rx7.glb": Math.PI / 2,
+  "/models/toyota-ae86.glb": Math.PI / 2,
+  "/models/nissan-gtr.glb": Math.PI / 2,
+  "/models/nissan-180sx.glb": Math.PI / 2,
+  "/models/motorcycle.glb": 0,
+};
+
 // Loads a glTF/.glb vehicle from public/models and drops it into the scene,
 // auto-normalised: whatever units the model ships in, it's recentred on the
 // ground and scaled so its longest horizontal dimension equals `length` (world
-// units). Every mesh casts/receives shadows so it sits in the night lighting.
+// units), and yaw-corrected so its nose points +X. Every mesh casts/receives
+// shadows so it sits in the night lighting.
 export function GLBModel({
   url,
   position,
   rotation = [0, 0, 0],
-  length = 2,
+  length,
+  height,
 }: {
   url: string;
   position: [number, number, number];
   rotation?: [number, number, number];
   length?: number; // desired world size of the longest horizontal axis
+  height?: number; // OR desired world height (for tall/thin props like poles)
 }) {
+  const yaw = MODEL_YAW[url] ?? 0;
   const { scene } = useGLTF(url);
   const { obj, autoScale } = useMemo(() => {
     const c = scene.clone(true);
@@ -35,11 +50,16 @@ export function GLBModel({
     // recentre on x/z, drop bottom to y=0
     c.position.set(-center.x, -box.min.y, -center.z);
     const footprint = Math.max(size.x, size.z, 0.0001);
-    return { obj: c, autoScale: 1 / footprint };
-  }, [scene]);
+    const scale = height ? height / Math.max(size.y, 0.0001) : (length ?? 2) / footprint;
+    return { obj: c, autoScale: scale };
+  }, [scene, length, height]);
 
   return (
-    <group position={position} rotation={rotation} scale={autoScale * length}>
+    <group
+      position={position}
+      rotation={[rotation[0], rotation[1] + yaw, rotation[2]]}
+      scale={autoScale}
+    >
       <primitive object={obj} />
     </group>
   );
