@@ -55,6 +55,18 @@
   temporary `window.__go` hook. Don't conclude an interaction is broken from a failed
   synthetic click.
 
+### Scenery detail via procedural textures (2026-07-06)
+
+The fix for "everything looks like 3D rectangles" is **textures + emissive maps on simple
+shapes**, not modelling detail. `src/textures.ts` draws them on an HTML canvas at load (no
+external image files — CSP-safe): `makeFacadeTexture` (window grid, used as map +
+emissiveMap so only windows glow), `makeStorefrontTexture` (glass/shelves/products for the
+shop front), `makeSkylineTexture` (night-city backdrop plane). Neighbour buildings use
+`FacadeBox`; the shop front panels are lit storefront windows; a far `Backdrop` plane adds
+city depth. To add more "place" detail, extend this file with more canvas textures (signage,
+kanji boards, AC units, posters) rather than more geometry. Seeded RNG keeps layouts stable
+across reloads.
+
 ### Still open / next ideas
 
 - Lofi + rain **audio bed** (needs a real loop file to bundle).
