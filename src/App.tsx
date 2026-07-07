@@ -102,9 +102,11 @@ function Scene({
         />
       ))}
 
-      {/* Traffic passing on the street */}
-      <PassingCar url="/models/nissan-gtr.glb" z={6.2} speed={10} from={-32} to={32} />
-      <PassingCar url="/models/nissan-180sx.glb" z={8} speed={7} from={34} to={-34} />
+      {/* Traffic passing on the street. Japan drives on the LEFT, so a car
+          heading right (+X) keeps the far lane (garage side), and one heading
+          left (-X) keeps the near lane (camera side). */}
+      <PassingCar url="/models/nissan-gtr.glb" z={4.3} speed={10} from={-32} to={32} />
+      <PassingCar url="/models/nissan-180sx.glb" z={7.8} speed={7} from={34} to={-34} />
 
       {cars.map((slot) => (
         <Car

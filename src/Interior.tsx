@@ -50,10 +50,8 @@ function Loft() {
       {[-7.6, 2.4].map((x) => (
         <Box key={x} position={[x, y + 0.22, zC + d / 2]} args={[0.08, 0.45, 0.08]} color="#2a3350" />
       ))}
-      {/* Stairs down on the right */}
-      {[0, 1, 2, 3].map((i) => (
-        <Box key={i} position={[3.4, y - 0.35 * i - 0.1, zC + d / 2 - 0.4 - i * 0.4]} args={[1.4, 0.2, 0.4]} color="#181d30" />
-      ))}
+      {/* Staircase up to the loft (real model) */}
+      <GLBModel url="/models/staircase.glb" position={[2.6, 0, -10.6]} height={2.9} />
 
       {/* Hangout dressing on the deck */}
       {/* Rug */}
