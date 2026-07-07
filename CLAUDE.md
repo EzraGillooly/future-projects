@@ -73,12 +73,24 @@ across reloads.
   one facade seed. Vary their silhouettes (setbacks, different heights/widths, rooftop
   props) and give each its own facade seed/tint so they stop looking identical.
 
-### Real car assets (for replacing the primitive cars)
+### Asset pipeline (in place)
 
-Free glTF/`.glb` sources, low-poly first: **Poly Pizza** (poly.pizza, CC0, best fit),
-**Kenney** (kenney.nl Car/Racing kits, CC0), **Quaternius** (CC0). Higher detail:
-**Sketchfab** filtered to Downloadable + CC0/CC-BY (credit CC-BY). Drop `.glb` into
-`public/models/`, load with drei `useGLTF`, swap per car; prefer Draco-compressed.
+Real `.glb` models load via `src/Vehicle.tsx` `GLBModel` — **auto-normalises** any model
+(recentre on ground, scale longest horizontal axis to a target `length`) + enables shadows,
+so source units/orientation don't matter (tune `modelYaw` if a model's nose isn't +X).
+Models live in `public/models/`. Wired: 5 JDM cars + a motorcycle. Interior project cars are
+real models mapped in `layout.ts` `PROJECT_CARS` (dream-garage→RX-7, now-building→AE86,
+jdm-spotter→GTR, screenshot-filer→180SX). `PassingCar` loops traffic on the street.
+
+Sources (low-poly, free): **Poly Pizza** (CC0, best fit), **Kenney** kits (CC0),
+**Quaternius** (CC0), **Sketchfab** filtered CC0/CC-BY (credit CC-BY).
+
+**Worth sourcing next** (hard to fake procedurally, big payoff): low-poly **people/
+pedestrians**, a **traffic light**, **bench / bus stop / phone booth**, a **proper vending
+machine**, extra **vehicles** (truck, kei car, bus) for traffic variety, **trees/potted
+plants**, **dumpster / crates / bicycle**, a **roll-up garage door**. Drop any of these in
+`public/models/` and they wire straight into `GLBModel`. Everything else (buildings,
+facades, signage, road, puddles, neon, atmosphere) stays procedural in-code.
 
 ### Still open / next ideas
 
