@@ -80,10 +80,10 @@ function GarageDoor({ onEnter, live }: { onEnter: () => void; live: boolean }) {
 
   return (
     <group>
-      {/* Invisible click/hover target across the opening */}
+      {/* Transparent click/hover target across the opening (opacity 0 rather
+          than visible=false, so R3F still fires pointer events on it) */}
       <mesh
         position={[0, DOOR_H / 2, 0.06]}
-        visible={false}
         onClick={(e) => {
           if (!live) return;
           e.stopPropagation();
@@ -97,6 +97,7 @@ function GarageDoor({ onEnter, live }: { onEnter: () => void; live: boolean }) {
         onPointerOut={() => setHovered(false)}
       >
         <planeGeometry args={[DOOR_W, DOOR_H]} />
+        <meshBasicMaterial colorWrite={false} depthWrite={false} />
       </mesh>
       {/* Neon door frame */}
       {[
@@ -205,6 +206,27 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <boxGeometry args={[0.1, 2.4, 0.3]} />
         <meshStandardMaterial color="#ff4fd8" emissive="#ff4fd8" emissiveIntensity={2.6} toneMapped={false} />
       </mesh>
+
+      {/* Overhead power lines crossing the street (silhouette against the
+          lit buildings) */}
+      {[
+        { y: 6.9, z: 5.5 },
+        { y: 6.6, z: 6.2 },
+        { y: 7.1, z: 4.8 },
+      ].map((w, i) => (
+        <mesh key={i} position={[0, w.y, w.z]} rotation={[0, 0, 0]}>
+          <boxGeometry args={[34, 0.04, 0.04]} />
+          <meshStandardMaterial color="#15171f" metalness={0.2} roughness={0.8} />
+        </mesh>
+      ))}
+
+      {/* Faint centre-line dashes down the wet road */}
+      {[3, 5.5, 8, 10.5].map((z) => (
+        <mesh key={z} position={[0, 0.02, z]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.28, 1.1]} />
+          <meshStandardMaterial color="#c9b877" emissive="#7a6a2e" emissiveIntensity={0.5} roughness={0.7} />
+        </mesh>
+      ))}
 
       {/* Street lamp posts, pushed to the frame edges */}
       {[-9.5, 9.5].map((x) => (

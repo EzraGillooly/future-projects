@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { MeshReflectorMaterial } from "@react-three/drei";
+import { MeshReflectorMaterial, Environment, Lightformer } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
+import * as THREE from "three";
 import { STREET, ENTRANCE, buildCarSlots, STREET_CARS, type CameraPose, type CarSlot } from "./layout";
 import { Car } from "./Car";
 import { StreetCar } from "./StreetCar";
@@ -45,6 +46,17 @@ function Scene({
   return (
     <>
       <CameraRig pose={pose} />
+
+      {/* Self-contained night environment: reflects in the cars' metal without
+          any external HDRI. Dim blue sky + warm door glow + neon strips. */}
+      <Environment resolution={256} frames={1}>
+        <color attach="background" args={["#04050b"]} />
+        <Lightformer intensity={0.6} color="#3a4a80" position={[0, 8, -2]} scale={[20, 12, 1]} />
+        <Lightformer intensity={3} color="#ffb26b" position={[0, 2, -4]} scale={[5, 4, 1]} />
+        <Lightformer intensity={1.6} color="#ff4fd8" position={[-8, 3, 2]} scale={[1, 6, 1]} />
+        <Lightformer intensity={1.6} color="#4fd8ff" position={[8, 3, 2]} scale={[1, 6, 1]} />
+        <Lightformer intensity={1.2} color="#fff0cf" position={[0, 6, 8]} scale={[8, 1, 1]} />
+      </Environment>
 
       {/* Night ambient + warm spill from inside the shop + cool street fill */}
       <ambientLight intensity={0.14} color="#2a3358" />
@@ -90,9 +102,9 @@ function Scene({
 
       <Rain />
 
-      <EffectComposer>
-        <Bloom mipmapBlur intensity={0.85} luminanceThreshold={0.6} luminanceSmoothing={0.3} />
-        <Vignette eskil={false} offset={0.28} darkness={0.8} />
+      <EffectComposer multisampling={4}>
+        <Bloom mipmapBlur intensity={1.1} luminanceThreshold={0.55} luminanceSmoothing={0.35} radius={0.7} />
+        <Vignette eskil={false} offset={0.3} darkness={0.85} />
       </EffectComposer>
     </>
   );
@@ -166,6 +178,8 @@ export function App() {
     <>
       <Canvas
         shadows
+        dpr={[1, 1.5]}
+        gl={{ antialias: false, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15 }}
         camera={{ position: STREET.position.toArray(), fov: 45 }}
         style={{ position: "fixed", inset: 0 }}
       >
