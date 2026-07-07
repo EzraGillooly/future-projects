@@ -27,8 +27,18 @@ export interface CarSlot {
   project: Project;
   position: THREE.Vector3;
   facing: number;
-  cameraPose: CameraPose; // angled 3/4 view into the open hood
+  cameraPose: CameraPose; // angled 3/4 view of the car front
+  model: string; // .glb url
+  modelYaw: number; // native-forward correction so the nose points +X
 }
+
+// Which real car represents each project (by project id).
+const PROJECT_CARS: Record<string, string> = {
+  "dream-garage": "/models/mazda-rx7.glb",
+  "now-building-widget": "/models/toyota-ae86.glb",
+  "jdm-car-spotter": "/models/nissan-gtr.glb",
+  "screenshot-filer": "/models/nissan-180sx.glb",
+};
 
 // side: -1 left wall, +1 right wall. z runs deeper into the shop.
 const CAR_SPOTS: { side: -1 | 1; z: number }[] = [
@@ -52,7 +62,14 @@ export function buildCarSlots(): CarSlot[] {
       position: new THREE.Vector3(x + dir * 4.4, 2.15, z + 2.3),
       target: new THREE.Vector3(x + dir * 0.6, 0.9, z),
     };
-    return { project, position: new THREE.Vector3(x, 0, z), facing, cameraPose };
+    return {
+      project,
+      position: new THREE.Vector3(x, 0, z),
+      facing,
+      cameraPose,
+      model: PROJECT_CARS[project.id] ?? "/models/nissan-180sx.glb",
+      modelYaw: 0,
+    };
   });
 }
 
@@ -63,9 +80,7 @@ export interface Decor {
   color: string;
 }
 
-// Parked along the garage wall, parallel to the street (nose along +X), on the
-// apron just in front of the building, flanking the door.
+// Motorcycle parked outside the convenience store, turned to face the street.
 export const STREET_CARS: Decor[] = [
-  { position: [-4, 0, 1.7], facing: 0, color: "#e6b800" }, // yellow
-  { position: [3.6, 0, 1.7], facing: 0, color: "#d81f3a" }, // red
+  { position: [4, 0, 1.8], facing: -Math.PI / 2, color: "#d81f3a" },
 ];

@@ -108,7 +108,6 @@ function Scene({
           slot={slot}
           interactive={atEntrance}
           active={activeCar?.project.id === slot.project.id}
-          dimmed={activeCar !== null && activeCar.project.id !== slot.project.id}
           onSelect={() => onSelect(slot.project.id)}
         />
       ))}
