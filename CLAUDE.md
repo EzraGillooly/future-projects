@@ -32,7 +32,9 @@
   `Car` / `StreetCar`, `Rain.tsx`, `ProjectPopup.tsx`.
 - **Deferred:** the lofi + rain **audio bed** (Phase 2) — needs a real loop file to bundle;
   scaffold only when the asset exists. Photoreal/GLB car models remain a later asset task.
-- Repo is initialized (git, local only — no remote yet).
+- **Public GitHub repo:** https://github.com/EzraGillooly/future-projects (pushed under the
+  EzraGillooly account). Commits use the GitHub `noreply` email (icloud was blocked by
+  email-privacy protection).
 
 ### Graphics pass done (2026-07-06)
 
