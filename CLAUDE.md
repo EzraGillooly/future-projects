@@ -67,6 +67,17 @@ city depth. To add more "place" detail, extend this file with more canvas textur
 kanji boards, AC units, posters) rather than more geometry. Seeded RNG keeps layouts stable
 across reloads.
 
+### Interior is bigger than the exterior (by design)
+
+The garage interior (`src/Interior.tsx`) is intentionally larger than the street facade —
+the camera never sees both at once, so the "inside bigger than outside" trick is free. It
+has a deep main bay (4 project cars facing the aisle), a back **loft** (deck, railing,
+stairs, couch, rug, glowing TV) and a left **lift** bay (2-post lift + raised decor car).
+The `ENTRANCE` pose is a 3/4 interior reveal. **Gotcha:** backdrop buildings (apartment +
+`CityBuildings`) must stay OUT of the interior footprint (x ∈ [-11, 6], z ∈ [-18, 0]) or
+they show through the interior walls — keep new backdrop buildings clear of that box. The
+loft could be dressed with real furniture from the house-interior pack (couch, lamp, TV).
+
 ### Deferred (Ezra asked, not yet done)
 
 - **Building differentiation** — the neighbour buildings are too uniformly square and share
