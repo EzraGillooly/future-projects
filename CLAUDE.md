@@ -34,15 +34,33 @@
   scaffold only when the asset exists. Photoreal/GLB car models remain a later asset task.
 - Repo is initialized (git, local only — no remote yet).
 
-### Next up (Ezra, 2026-07-06)
+### Graphics pass done (2026-07-06)
 
-1. **Level up the graphics** — the current look is a stylized greybox-plus-dress. Push
-   fidelity: better materials/lighting, real low-poly `.glb` car + shop assets, richer
-   night atmosphere. This is the main thrust of the next session.
-2. **Street view from the LEFT side of the garage, not the right.** The `STREET` pose in
-   `layout.ts` is currently at `+X` (right of the door, looking across). Move it to `-X`
-   (mirror the position) so the establishing shot looks in from the left, and re-check the
-   street-car / lamp framing against the new angle.
+- **Street view now from the LEFT** (`STREET` pose at `-X`). ✅
+- **Graphics level-up:** ACES filmic tone mapping + exposure, MSAA via the composer, a
+  self-contained neon night `Environment` (drei `Lightformer`s — no external HDRI) so the
+  glossy car paint + glass reflect the scene; detailed `CarModel` (glass greenhouse, rims,
+  mirrors, rear wing, tail-lights); rain as falling streaks; overhead power lines + road
+  dashes; brighter bloom.
+
+### Gotchas (learned the hard way — read before testing/editing interactions)
+
+- **Invisible click hitboxes must render *something*.** R3F skips pointer events on meshes
+  that are `visible={false}` **or** fully transparent (`opacity 0`). Use
+  `<meshBasicMaterial colorWrite={false} depthWrite={false} />` — invisible, non-occluding,
+  still raycastable. The garage-door hotspot relies on this.
+- **Synthetic pointer events (Playwright `dispatchEvent`) don't reliably drive R3F raycasts
+  in this heavier scene** — they silently no-op. Verify interactions with a *real*
+  `page.locator('canvas').click()` (real input works fine), or drive state directly with a
+  temporary `window.__go` hook. Don't conclude an interaction is broken from a failed
+  synthetic click.
+
+### Still open / next ideas
+
+- Lofi + rain **audio bed** (needs a real loop file to bundle).
+- Real low-poly `.glb` car/shop assets (sourcing + license) for another fidelity jump.
+- Depth-of-field on the focused car shot; animate the roll-up door opening.
+- Per-car paint colours; `prefers-reduced-motion` (cut rain / soften camera).
 
 ## What this project is
 
