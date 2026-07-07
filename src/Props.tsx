@@ -110,13 +110,14 @@ export function Manhole({ position }: { position: Vec3 }) {
   );
 }
 
-// Zebra crossing: a row of white stripes across the road (along +Z).
-export function Crosswalk({ x, z }: { x: number; z: number }) {
+// Zebra crossing that spans the road: stripes are long across the road (Z) and
+// repeated along the road (X). `z` is the road-centre the crossing straddles.
+export function Crosswalk({ x, z = 6.3 }: { x: number; z?: number }) {
   return (
     <group position={[x, 0.02, z]}>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <mesh key={i} position={[-1.4 + i * 0.56, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.34, 2.6]} />
+      {Array.from({ length: 7 }).map((_, i) => (
+        <mesh key={i} position={[-1.8 + i * 0.6, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.36, 7]} />
           <meshStandardMaterial color="#c9ccd6" emissive="#3a3d44" emissiveIntensity={0.3} roughness={0.8} polygonOffset polygonOffsetFactor={-1} />
         </mesh>
       ))}

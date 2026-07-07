@@ -262,8 +262,8 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
 
       <GarageDoor onEnter={onEnter} live={doorLive} />
 
-      {/* --- 24H convenience store, to the left of the garage --- */}
-      <MartBuilding x={-8.5} facade={facade} store={store} banner={martBanner} />
+      {/* --- 24H convenience store, to the left with an alley before the garage --- */}
+      <MartBuilding x={-11} facade={facade} store={store} banner={martBanner} />
 
       {/* --- Apartment block (moved back, clear of the expanded interior) --- */}
       <FacadeBox position={[0, 8, -26]} args={[18, 16, 3]} repeat={[6, 6]} facade={facade} />
@@ -273,7 +273,7 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
 
       {/* Vertical neon signboards */}
       <NeonSign tex={sign1} position={[12.9, 4.2, 1]} rotation={[0, -Math.PI / 2, 0]} scale={1.2} />
-      <NeonSign tex={sign2} position={[-11.4, 3.7, 0.2]} scale={1.05} />
+      <NeonSign tex={sign2} position={[-13.9, 3.7, 0.2]} scale={1.05} />
       <NeonSign tex={sign3} position={[-14.5, 6, 3.06]} scale={1.1} />
 
       {/* Overhead power lines crossing the street (silhouette against the
@@ -303,7 +303,7 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       {/* Ground detail: manholes + a crosswalk */}
       <Manhole position={[3, 0.02, 5.5]} />
       <Manhole position={[-7.5, 0.02, 7]} />
-      <Crosswalk x={1} z={7.6} />
+      <Crosswalk x={7} />
 
       {/* Puddles catching the neon (wet night) */}
       <Puddle position={[2, 0.015, 3.2]} scale={[1.6, 1.0]} rotation={0.3} />
@@ -321,16 +321,16 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       ))}
 
       {/* Street lamps (real models) on the sidewalk + a warm glow at each head */}
-      {[8, -6].map((x) => (
+      {[7, -9].map((x) => (
         <group key={x}>
           <GLBModel url="/models/streetlight.glb" position={[x, 0, 2.7]} rotation={[0, x < 0 ? -Math.PI / 2 : Math.PI / 2, 0]} height={6} />
           <pointLight position={[x, 5.4, 3.5]} intensity={22} color="#ffe6b0" distance={16} />
         </group>
       ))}
 
-      {/* A dumpster + a little litter by the garage's right side */}
-      <GLBModel url="/models/dumpster.glb" position={[7.6, 0, 1.7]} rotation={[0, Math.PI / 2, 0]} length={2.4} />
-      <GLBModel url="/models/debris-papers.glb" position={[5.4, 0.02, 2.4]} rotation={[0, 0.4, 0]} length={0.8} />
+      {/* Big dumpster in the alley, against the 24H mart's side wall + litter */}
+      <GLBModel url="/models/dumpster.glb" position={[-7.3, 0, -1]} rotation={[0, Math.PI / 2, 0]} length={2.4} />
+      <GLBModel url="/models/debris-papers.glb" position={[-6.6, 0.02, 0.6]} rotation={[0, 0.4, 0]} length={0.8} />
       <GLBModel url="/models/debris-papers.glb" position={[-2.2, 0.02, 6.4]} rotation={[0, 1.3, 0]} length={0.7} />
     </group>
   );

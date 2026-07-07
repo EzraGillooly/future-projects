@@ -10,8 +10,8 @@ export interface CameraPose {
 }
 
 export const STREET: CameraPose = {
-  position: new THREE.Vector3(6, 3.1, 12),
-  target: new THREE.Vector3(0, 1.4, -2),
+  position: new THREE.Vector3(-6, 3.1, 12),
+  target: new THREE.Vector3(0.5, 1.4, -2),
 };
 
 export const ENTRANCE: CameraPose = {
@@ -83,5 +83,5 @@ export interface Decor {
 // Motorcycle parked outside the convenience store (now on the left), raised
 // onto the sidewalk, turned to face the street.
 export const STREET_CARS: Decor[] = [
-  { position: [-5.5, 0.13, 1.9], facing: Math.PI / 2, color: "#d81f3a" },
+  { position: [-10, 0.13, 1.9], facing: Math.PI / 2, color: "#d81f3a" },
 ];
