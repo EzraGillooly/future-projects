@@ -8,14 +8,6 @@ Each car in the garage is a "future build" — a project idea, mapped to a real 
 model (RX-7, GTR, AE86, 180SX). The street around it (convenience store, neon signs,
 traffic, rain, wet reflections) is procedurally textured — no external image assets.
 
-## Run it
-
-```bash
-npm install
-npm run dev      # http://localhost:5180
-npm run build
-```
-
 ## Stack
 
 React 19 · React Three Fiber · three.js · `@react-three/drei` · `@react-three/postprocessing` · Vite · TypeScript
