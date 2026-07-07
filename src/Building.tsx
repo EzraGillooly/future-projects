@@ -9,6 +9,7 @@ import {
   makeCorrugatedTexture,
 } from "./textures";
 import { ACUnit, Pipe, Bush, TrashCan, Awning } from "./Props";
+import { CityBuildings } from "./CityBuildings";
 
 // A glowing vertical neon signboard mounted flat against a wall.
 function NeonSign({
@@ -289,12 +290,12 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       {/* --- 24H convenience store, to the right of the garage --- */}
       <MartBuilding x={8.5} facade={facade} store={store} banner={martBanner} />
 
-      {/* --- Apartment block behind the shop --- */}
+      {/* --- Apartment block directly behind the shop --- */}
       <FacadeBox position={[0, 6.5, -13]} args={[14, 13, 3]} repeat={[5, 5]} facade={facade} />
 
-      {/* --- Framing buildings along the street --- */}
-      <FacadeBox position={[-11, 4, -3]} args={[6, 8, 12]} repeat={[3, 4]} facade={facade} />
-      <FacadeBox position={[16, 5, -3]} args={[6, 10, 12]} repeat={[3, 5]} facade={facade} />
+      {/* --- Varied city buildings (depth + skyline variety) --- */}
+      <CityBuildings />
+
       {/* Vertical neon signboards */}
       <NeonSign tex={sign1} position={[-7.95, 4.2, 2.5]} rotation={[0, Math.PI / 2, 0]} scale={1.2} />
       <NeonSign tex={sign2} position={[11.4, 3.7, 0.2]} scale={1.05} />
