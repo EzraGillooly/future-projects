@@ -15,8 +15,8 @@ export const STREET: CameraPose = {
 };
 
 export const ENTRANCE: CameraPose = {
-  position: new THREE.Vector3(0, 1.75, 3),
-  target: new THREE.Vector3(0, 1.05, -6),
+  position: new THREE.Vector3(3.4, 2.5, 2.2),
+  target: new THREE.Vector3(-3.5, 1.3, -11),
 };
 
 // --- Interior project cars --------------------------------------------------

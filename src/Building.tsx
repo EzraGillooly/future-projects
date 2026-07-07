@@ -11,6 +11,7 @@ import {
 import { ACUnit, Pipe, Bush, TrashCan, Awning, Puddle, Manhole, Crosswalk } from "./Props";
 import { CityBuildings } from "./CityBuildings";
 import { GLBModel } from "./Vehicle";
+import { Interior } from "./Interior";
 
 // A glowing vertical neon signboard mounted flat against a wall.
 function NeonSign({
@@ -84,10 +85,7 @@ function Backdrop({ skyline }: { skyline: THREE.Texture }) {
 export const DOOR_W = 4.4;
 export const DOOR_H = 3.4;
 const SHOP_W = 10;
-const SHOP_D = 9;
 const SHOP_H = 5.5;
-
-const WALL_DARK = "#161b2e";
 
 // A deterministic grid of lit windows on a building's +Z face.
 
@@ -233,37 +231,8 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <meshStandardMaterial map={corrugated} metalness={0.6} roughness={0.55} />
       </mesh>
 
-      {/* Side + back walls, roof, interior floor */}
-      <mesh position={[-SHOP_W / 2, SHOP_H / 2, -SHOP_D / 2]}>
-        <boxGeometry args={[0.2, SHOP_H, SHOP_D]} />
-        <meshStandardMaterial color={WALL_DARK} />
-      </mesh>
-      <mesh position={[SHOP_W / 2, SHOP_H / 2, -SHOP_D / 2]}>
-        <boxGeometry args={[0.2, SHOP_H, SHOP_D]} />
-        <meshStandardMaterial color={WALL_DARK} />
-      </mesh>
-      <mesh position={[0, SHOP_H / 2, -SHOP_D]}>
-        <boxGeometry args={[SHOP_W, SHOP_H, 0.2]} />
-        <meshStandardMaterial color={WALL_DARK} />
-      </mesh>
-      <mesh position={[0, SHOP_H, -SHOP_D / 2]} castShadow>
-        <boxGeometry args={[SHOP_W + 0.6, 0.2, SHOP_D + 0.4]} />
-        <meshStandardMaterial color="#0e1220" metalness={0.4} roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 0.02, -SHOP_D / 2]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[SHOP_W, SHOP_D]} />
-        <meshStandardMaterial color="#1a1e2e" roughness={0.9} />
-      </mesh>
-
-      {/* Interior neon accent strips along the side walls */}
-      <mesh position={[-SHOP_W / 2 + 0.15, 3.2, -SHOP_D / 2]}>
-        <boxGeometry args={[0.05, 0.12, SHOP_D - 1]} />
-        <meshStandardMaterial color="#ff4fd8" emissive="#ff4fd8" emissiveIntensity={2.4} toneMapped={false} />
-      </mesh>
-      <mesh position={[SHOP_W / 2 - 0.15, 3.2, -SHOP_D / 2]}>
-        <boxGeometry args={[0.05, 0.12, SHOP_D - 1]} />
-        <meshStandardMaterial color="#4fd8ff" emissive="#4fd8ff" emissiveIntensity={2.4} toneMapped={false} />
-      </mesh>
+      {/* Expanded interior (walls, floor, ceiling, loft, lift) */}
+      <Interior />
 
       {/* GARAGE sign above the roll-up door */}
       <mesh position={[0, DOOR_H + 0.55, 0.16]}>
@@ -291,14 +260,14 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       {/* --- 24H convenience store, to the right of the garage --- */}
       <MartBuilding x={8.5} facade={facade} store={store} banner={martBanner} />
 
-      {/* --- Apartment block directly behind the shop --- */}
-      <FacadeBox position={[0, 6.5, -13]} args={[14, 13, 3]} repeat={[5, 5]} facade={facade} />
+      {/* --- Apartment block (moved back, clear of the expanded interior) --- */}
+      <FacadeBox position={[0, 8, -26]} args={[18, 16, 3]} repeat={[6, 6]} facade={facade} />
 
       {/* --- Varied city buildings (depth + skyline variety) --- */}
       <CityBuildings />
 
       {/* Vertical neon signboards */}
-      <NeonSign tex={sign1} position={[-7.95, 4.2, 2.5]} rotation={[0, Math.PI / 2, 0]} scale={1.2} />
+      <NeonSign tex={sign1} position={[-12.9, 4.2, 1]} rotation={[0, Math.PI / 2, 0]} scale={1.2} />
       <NeonSign tex={sign2} position={[11.4, 3.7, 0.2]} scale={1.05} />
       <NeonSign tex={sign3} position={[14.5, 6, 3.06]} scale={1.1} />
 
