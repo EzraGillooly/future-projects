@@ -138,6 +138,75 @@ export function makeStorefrontTexture(seed = 7): THREE.CanvasTexture {
   return tex;
 }
 
+// A vertical neon signboard with stacked characters (as in the refs). Bright on
+// dark so it glows through bloom when used on an unlit (basic) material.
+export function makeSignTexture(chars: string, accent = "#ff4fd8"): THREE.CanvasTexture {
+  const w = 128;
+  const h = 384;
+  const cvs = document.createElement("canvas");
+  cvs.width = w;
+  cvs.height = h;
+  const ctx = cvs.getContext("2d")!;
+
+  ctx.fillStyle = "#0a0b12";
+  ctx.fillRect(0, 0, w, h);
+  // glowing border
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 6;
+  ctx.shadowColor = accent;
+  ctx.shadowBlur = 18;
+  ctx.strokeRect(8, 8, w - 16, h - 16);
+
+  // stacked glyphs
+  const glyphs = [...chars];
+  const step = (h - 40) / glyphs.length;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "bold 58px 'Hiragino Sans', 'Yu Gothic', sans-serif";
+  ctx.fillStyle = "#fff";
+  ctx.shadowColor = accent;
+  ctx.shadowBlur = 22;
+  glyphs.forEach((g, i) => {
+    ctx.fillText(g, w / 2, 30 + step * (i + 0.5));
+  });
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
+
+// A horizontal convenience-store banner: bright stripes + a simple mark. Used
+// over the shop door.
+export function makeBannerTexture(): THREE.CanvasTexture {
+  const w = 512;
+  const h = 96;
+  const cvs = document.createElement("canvas");
+  cvs.width = w;
+  cvs.height = h;
+  const ctx = cvs.getContext("2d")!;
+
+  ctx.fillStyle = "#f4f6ff";
+  ctx.fillRect(0, 0, w, h);
+  // three stripes along the bottom
+  ctx.fillStyle = "#ef4136";
+  ctx.fillRect(0, h - 22, w, 8);
+  ctx.fillStyle = "#f7931e";
+  ctx.fillRect(0, h - 14, w, 8);
+  ctx.fillStyle = "#2ba24c";
+  ctx.fillRect(0, h - 6, w, 6);
+  // wordmark
+  ctx.fillStyle = "#1c8a3c";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "bold 46px system-ui, sans-serif";
+  ctx.fillText("24H  MART", w / 2, h / 2 - 6);
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 // A wide night-city backdrop: gradient sky, stars, and layered building
 // silhouettes speckled with tiny lit windows. Rendered unlit (self-emissive).
 export function makeSkylineTexture(): THREE.CanvasTexture {

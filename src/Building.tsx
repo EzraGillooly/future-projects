@@ -1,6 +1,33 @@
 import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
-import { makeFacadeTexture, makeSkylineTexture, makeStorefrontTexture } from "./textures";
+import {
+  makeFacadeTexture,
+  makeSkylineTexture,
+  makeStorefrontTexture,
+  makeSignTexture,
+  makeBannerTexture,
+} from "./textures";
+import { ACUnit, Pipe, Bush, TrashCan, Awning } from "./Props";
+
+// A glowing vertical neon signboard mounted flat against a wall.
+function NeonSign({
+  position,
+  rotation = [0, 0, 0],
+  scale = 1,
+  tex,
+}: {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: number;
+  tex: THREE.Texture;
+}) {
+  return (
+    <mesh position={position} rotation={rotation} scale={scale}>
+      <planeGeometry args={[1, 3]} />
+      <meshBasicMaterial map={tex} transparent toneMapped={false} />
+    </mesh>
+  );
+}
 
 // The night-time tuning shop, its neighbours, and the clickable garage door.
 // Simple boxes, but the neighbours wear a procedural facade texture (window
@@ -117,6 +144,10 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
   const facade = useMemo(() => makeFacadeTexture(3), []);
   const skyline = useMemo(() => makeSkylineTexture(), []);
   const store = useMemo(() => makeStorefrontTexture(), []);
+  const banner = useMemo(() => makeBannerTexture(), []);
+  const sign1 = useMemo(() => makeSignTexture("ラーメン", "#ff4fd8"), []);
+  const sign2 = useMemo(() => makeSignTexture("居酒屋", "#4fd8ff"), []);
+  const sign3 = useMemo(() => makeSignTexture("カラオケ", "#ffb43f"), []);
   return (
     <group>
       <Backdrop skyline={skyline} />
@@ -170,11 +201,18 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <meshStandardMaterial color="#4fd8ff" emissive="#4fd8ff" emissiveIntensity={2.4} toneMapped={false} />
       </mesh>
 
-      {/* Shop sign above the door */}
-      <mesh position={[0, DOOR_H + 0.55, 0.16]}>
-        <boxGeometry args={[3.6, 0.5, 0.06]} />
-        <meshStandardMaterial color="#eaf6ff" emissive="#8fe6ff" emissiveIntensity={2.2} toneMapped={false} />
+      {/* Shop banner above the door */}
+      <mesh position={[0, DOOR_H + 1.15, 0.16]}>
+        <boxGeometry args={[4.4, 0.7, 0.06]} />
+        <meshStandardMaterial map={banner} emissiveMap={banner} emissive="#ffffff" emissiveIntensity={0.9} toneMapped={false} />
       </mesh>
+      {/* Awning over the storefront */}
+      <Awning position={[0, DOOR_H + 0.25, 0.9]} width={SHOP_W - 0.4} />
+      {/* AC units + drainpipe on the shop face */}
+      <ACUnit position={[-4.3, 4.4, 0.35]} />
+      <ACUnit position={[4.2, 4.7, 0.35]} />
+      <Pipe position={[-4.95, 2.7, 0.2]} height={5.4} />
+      <Pipe position={[4.95, 2.7, 0.2]} height={5.4} />
 
       {/* Vending machines to the left of the door */}
       <mesh position={[-2.9, 0.9, 0.55]} castShadow>
@@ -194,11 +232,16 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       {/* --- Framing buildings along the street --- */}
       <FacadeBox position={[-11, 4, -3]} args={[6, 8, 12]} repeat={[3, 4]} facade={facade} />
       <FacadeBox position={[11, 5, -3]} args={[6, 10, 12]} repeat={[3, 5]} facade={facade} />
-      {/* Neon sign on the right building */}
-      <mesh position={[8.1, 5.5, 2]}>
-        <boxGeometry args={[0.1, 2.4, 0.3]} />
-        <meshStandardMaterial color="#ff4fd8" emissive="#ff4fd8" emissiveIntensity={2.6} toneMapped={false} />
-      </mesh>
+      {/* Vertical neon signboards mounted on the neighbouring buildings */}
+      <NeonSign tex={sign1} position={[-7.95, 4.2, 2.5]} rotation={[0, Math.PI / 2, 0]} scale={1.2} />
+      <NeonSign tex={sign2} position={[7.95, 3.6, 1.5]} rotation={[0, -Math.PI / 2, 0]} scale={1.15} />
+      <NeonSign tex={sign3} position={[9.6, 6, 3.06]} scale={1.1} />
+
+      {/* Bushes + trash by the storefront */}
+      <Bush position={[-4.4, 0, 1.3]} scale={1.1} />
+      <Bush position={[3.6, 0, 1.4]} scale={0.9} />
+      <TrashCan position={[2.6, 0.45, 1.2]} />
+      <TrashCan position={[3.1, 0.45, 1.35]} />
 
       {/* Overhead power lines crossing the street (silhouette against the
           lit buildings) */}
