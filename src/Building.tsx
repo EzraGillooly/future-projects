@@ -262,8 +262,8 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
 
       <GarageDoor onEnter={onEnter} live={doorLive} />
 
-      {/* --- 24H convenience store, to the left with an alley before the garage --- */}
-      <MartBuilding x={-11} facade={facade} store={store} banner={martBanner} />
+      {/* --- 24H convenience store, to the left with a wide alley before the garage --- */}
+      <MartBuilding x={-13.4} facade={facade} store={store} banner={martBanner} />
 
       {/* --- Apartment block (moved back, clear of the expanded interior) --- */}
       <FacadeBox position={[0, 8, -26]} args={[18, 16, 3]} repeat={[6, 6]} facade={facade} />
@@ -273,7 +273,7 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
 
       {/* Vertical neon signboards */}
       <NeonSign tex={sign1} position={[12.9, 4.2, 1]} rotation={[0, -Math.PI / 2, 0]} scale={1.2} />
-      <NeonSign tex={sign2} position={[-13.9, 3.7, 0.2]} scale={1.05} />
+      <NeonSign tex={sign2} position={[-16.3, 3.7, 0.2]} scale={1.05} />
       <NeonSign tex={sign3} position={[-14.5, 6, 3.06]} scale={1.1} />
 
       {/* Overhead power lines crossing the street (silhouette against the
@@ -329,8 +329,8 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       ))}
 
       {/* Big dumpster in the alley, against the 24H mart's side wall + litter */}
-      <GLBModel url="/models/dumpster.glb" position={[-7.3, 0, -1]} rotation={[0, Math.PI / 2, 0]} length={2.4} />
-      <GLBModel url="/models/debris-papers.glb" position={[-6.6, 0.02, 0.6]} rotation={[0, 0.4, 0]} length={0.8} />
+      <GLBModel url="/models/dumpster.glb" position={[-9.7, 0, -1]} rotation={[0, Math.PI / 2, 0]} length={2.4} />
+      <GLBModel url="/models/debris-papers.glb" position={[-8.5, 0.02, 0.6]} rotation={[0, 0.4, 0]} length={0.8} />
       <GLBModel url="/models/debris-papers.glb" position={[-2.2, 0.02, 6.4]} rotation={[0, 1.3, 0]} length={0.7} />
     </group>
   );
