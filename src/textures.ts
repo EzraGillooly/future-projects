@@ -176,9 +176,14 @@ export function makeSignTexture(chars: string, accent = "#ff4fd8"): THREE.Canvas
   return tex;
 }
 
-// A horizontal convenience-store banner: bright stripes + a simple mark. Used
-// over the shop door.
-export function makeBannerTexture(): THREE.CanvasTexture {
+// A horizontal shop banner: a wordmark on a light board, optional coloured
+// stripes. Used over shop doors ("24H MART", "GARAGE", ...).
+export function makeBannerTexture(
+  word = "24H MART",
+  wordColor = "#1c8a3c",
+  stripes = true,
+  board = "#f4f6ff",
+): THREE.CanvasTexture {
   const w = 512;
   const h = 96;
   const cvs = document.createElement("canvas");
@@ -186,23 +191,121 @@ export function makeBannerTexture(): THREE.CanvasTexture {
   cvs.height = h;
   const ctx = cvs.getContext("2d")!;
 
-  ctx.fillStyle = "#f4f6ff";
+  ctx.fillStyle = board;
   ctx.fillRect(0, 0, w, h);
-  // three stripes along the bottom
-  ctx.fillStyle = "#ef4136";
-  ctx.fillRect(0, h - 22, w, 8);
-  ctx.fillStyle = "#f7931e";
-  ctx.fillRect(0, h - 14, w, 8);
-  ctx.fillStyle = "#2ba24c";
-  ctx.fillRect(0, h - 6, w, 6);
-  // wordmark
-  ctx.fillStyle = "#1c8a3c";
+  if (stripes) {
+    ctx.fillStyle = "#ef4136";
+    ctx.fillRect(0, h - 22, w, 8);
+    ctx.fillStyle = "#f7931e";
+    ctx.fillRect(0, h - 14, w, 8);
+    ctx.fillStyle = "#2ba24c";
+    ctx.fillRect(0, h - 6, w, 6);
+  }
+  ctx.fillStyle = wordColor;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = "bold 46px system-ui, sans-serif";
-  ctx.fillText("24H  MART", w / 2, h / 2 - 6);
+  ctx.fillText(word, w / 2, h / 2 - (stripes ? 6 : 0));
 
   const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+// Battered wet asphalt: dark base with cracks, patches, oil stains and faded
+// paint smudges. Used as the road's map (on the reflective material).
+export function makeRoadTexture(seed = 5): THREE.CanvasTexture {
+  const s = 512;
+  const cvs = document.createElement("canvas");
+  cvs.width = cvs.height = s;
+  const ctx = cvs.getContext("2d")!;
+  const rng = mulberry32(seed);
+
+  ctx.fillStyle = "#14161d";
+  ctx.fillRect(0, 0, s, s);
+  // tonal patches (repaved sections)
+  for (let i = 0; i < 26; i++) {
+    const shade = 18 + Math.floor(rng() * 22);
+    ctx.fillStyle = `rgb(${shade},${shade + 2},${shade + 6})`;
+    ctx.globalAlpha = 0.5;
+    ctx.fillRect(rng() * s, rng() * s, 40 + rng() * 120, 30 + rng() * 90);
+  }
+  ctx.globalAlpha = 1;
+  // speckle grain
+  for (let i = 0; i < 2600; i++) {
+    const v = rng();
+    ctx.fillStyle = v > 0.5 ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.25)";
+    ctx.fillRect(rng() * s, rng() * s, 1, 1);
+  }
+  // cracks
+  ctx.strokeStyle = "rgba(0,0,0,0.55)";
+  for (let i = 0; i < 22; i++) {
+    ctx.lineWidth = rng() > 0.7 ? 2 : 1;
+    ctx.beginPath();
+    let x = rng() * s;
+    let y = rng() * s;
+    ctx.moveTo(x, y);
+    const segs = 3 + Math.floor(rng() * 5);
+    for (let j = 0; j < segs; j++) {
+      x += (rng() - 0.5) * 90;
+      y += (rng() - 0.5) * 90;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  // oil stains
+  for (let i = 0; i < 8; i++) {
+    const g = ctx.createRadialGradient(
+      rng() * s,
+      rng() * s,
+      2,
+      rng() * s,
+      rng() * s,
+      20 + rng() * 40,
+    );
+    g.addColorStop(0, "rgba(0,0,0,0.4)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, s, s);
+  }
+  // faded paint smudges
+  for (let i = 0; i < 5; i++) {
+    ctx.fillStyle = "rgba(200,190,140,0.12)";
+    ctx.fillRect(rng() * s, rng() * s, 8 + rng() * 30, 4);
+  }
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
+
+// Corrugated metal siding (vertical ribs) for the garage front.
+export function makeCorrugatedTexture(): THREE.CanvasTexture {
+  const s = 256;
+  const cvs = document.createElement("canvas");
+  cvs.width = cvs.height = s;
+  const ctx = cvs.getContext("2d")!;
+  ctx.fillStyle = "#2a2f3d";
+  ctx.fillRect(0, 0, s, s);
+  const ribs = 16;
+  const rw = s / ribs;
+  for (let i = 0; i < ribs; i++) {
+    const x = i * rw;
+    const g = ctx.createLinearGradient(x, 0, x + rw, 0);
+    g.addColorStop(0, "#1c202b");
+    g.addColorStop(0.5, "#394154");
+    g.addColorStop(1, "#1c202b");
+    ctx.fillStyle = g;
+    ctx.fillRect(x, 0, rw, s);
+  }
+  // faint horizontal seams
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  for (let y = 0; y < s; y += 64) ctx.fillRect(0, y, s, 2);
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }

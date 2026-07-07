@@ -63,7 +63,9 @@ export interface Decor {
   color: string;
 }
 
+// Parked along the garage wall, parallel to the street (nose along +X), on the
+// apron just in front of the building, flanking the door.
 export const STREET_CARS: Decor[] = [
-  { position: [-6.5, 0, 6], facing: 0, color: "#e6b800" }, // yellow, nose +X
-  { position: [6.5, 0, 6], facing: Math.PI, color: "#d81f3a" }, // red, nose -X
+  { position: [-4, 0, 1.7], facing: 0, color: "#e6b800" }, // yellow
+  { position: [3.6, 0, 1.7], facing: 0, color: "#d81f3a" }, // red
 ];

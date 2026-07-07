@@ -28,12 +28,14 @@ export function CarModel({
   glow,
   opacity = 1,
   headlights = true,
+  openHood = true,
 }: {
   bodyColor?: string;
   accent: string;
   glow: number;
   opacity?: number;
   headlights?: boolean;
+  openHood?: boolean;
 }) {
   const paint = { metalness: 0.85, roughness: 0.26, envMapIntensity: 1.3 };
 
@@ -67,16 +69,26 @@ export function CarModel({
         </mesh>
       ))}
 
-      {/* Open hood panel, hinged up at the nose */}
-      <mesh position={[0.62, 0.95, 0]} rotation={[0, 0, 0.95]} castShadow>
-        <boxGeometry args={[0.9, 0.05, 1.0]} />
-        <meshStandardMaterial color={bodyColor} {...paint} transparent opacity={opacity} />
-      </mesh>
-      {/* Engine block in the open bay */}
-      <mesh position={[0.72, 0.66, 0]}>
-        <boxGeometry args={[0.7, 0.38, 0.86]} />
-        <meshStandardMaterial color="#2b3050" emissive={accent} emissiveIntensity={glow * 0.4} metalness={0.7} roughness={0.4} />
-      </mesh>
+      {openHood ? (
+        <>
+          {/* Open hood panel, hinged up at the nose */}
+          <mesh position={[0.62, 0.95, 0]} rotation={[0, 0, 0.95]} castShadow>
+            <boxGeometry args={[0.9, 0.05, 1.0]} />
+            <meshStandardMaterial color={bodyColor} {...paint} transparent opacity={opacity} />
+          </mesh>
+          {/* Engine block in the open bay */}
+          <mesh position={[0.72, 0.66, 0]}>
+            <boxGeometry args={[0.7, 0.38, 0.86]} />
+            <meshStandardMaterial color="#2b3050" emissive={accent} emissiveIntensity={glow * 0.4} metalness={0.7} roughness={0.4} />
+          </mesh>
+        </>
+      ) : (
+        // Closed hood (flat panel over the nose)
+        <mesh position={[0.66, 0.71, 0]} castShadow>
+          <boxGeometry args={[0.94, 0.06, 1.02]} />
+          <meshStandardMaterial color={bodyColor} {...paint} transparent opacity={opacity} />
+        </mesh>
+      )}
 
       {/* Rear wing */}
       {[0.34, -0.34].map((z) => (

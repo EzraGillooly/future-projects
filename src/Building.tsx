@@ -6,6 +6,7 @@ import {
   makeStorefrontTexture,
   makeSignTexture,
   makeBannerTexture,
+  makeCorrugatedTexture,
 } from "./textures";
 import { ACUnit, Pipe, Bush, TrashCan, Awning } from "./Props";
 
@@ -84,7 +85,6 @@ const SHOP_W = 10;
 const SHOP_D = 9;
 const SHOP_H = 5.5;
 
-const WALL = "#20263c";
 const WALL_DARK = "#161b2e";
 
 // A deterministic grid of lit windows on a building's +Z face.
@@ -140,11 +140,73 @@ function GarageDoor({ onEnter, live }: { onEnter: () => void; live: boolean }) {
   );
 }
 
+// A separate 24H convenience store next to the garage: facade upper floors,
+// lit storefront ground floor, banner, awning, entrance.
+function MartBuilding({
+  x,
+  facade,
+  store,
+  banner,
+}: {
+  x: number;
+  facade: THREE.Texture;
+  store: THREE.Texture;
+  banner: THREE.Texture;
+}) {
+  const W = 6;
+  const H = 4.8;
+  const D = 6;
+  const facadeTex = useMemo(() => {
+    const t = facade.clone();
+    t.needsUpdate = true;
+    t.repeat.set(3, 3);
+    return t;
+  }, [facade]);
+  const storeTex = useMemo(() => {
+    const t = store.clone();
+    t.needsUpdate = true;
+    t.repeat.set(2, 1);
+    return t;
+  }, [store]);
+  return (
+    <group position={[x, 0, 0]}>
+      {/* body / upper floors */}
+      <mesh position={[0, H / 2, -D / 2]} castShadow receiveShadow>
+        <boxGeometry args={[W, H, D]} />
+        <meshStandardMaterial color="#ffffff" map={facadeTex} emissiveMap={facadeTex} emissive="#fff2dd" emissiveIntensity={0.9} roughness={0.85} metalness={0.1} />
+      </mesh>
+      {/* lit storefront ground floor */}
+      <mesh position={[0, 1.35, 0.07]} castShadow>
+        <boxGeometry args={[W - 0.5, 2.4, 0.14]} />
+        <meshStandardMaterial map={storeTex} emissiveMap={storeTex} emissive="#fff4dc" emissiveIntensity={0.85} roughness={0.5} metalness={0.2} />
+      </mesh>
+      {/* entrance door */}
+      <mesh position={[W * 0.28, 1.05, 0.16]}>
+        <boxGeometry args={[1.1, 2.1, 0.05]} />
+        <meshStandardMaterial color="#0a0d16" metalness={0.3} roughness={0.4} />
+      </mesh>
+      {/* 24H MART banner */}
+      <mesh position={[0, 2.9, 0.16]}>
+        <boxGeometry args={[W - 0.6, 0.62, 0.06]} />
+        <meshStandardMaterial map={banner} emissiveMap={banner} emissive="#ffffff" emissiveIntensity={0.9} toneMapped={false} />
+      </mesh>
+      <Awning position={[0, 2.55, 0.75]} width={W - 0.3} />
+      <ACUnit position={[-1.8, 4.1, 0.3]} />
+    </group>
+  );
+}
+
 export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: boolean }) {
   const facade = useMemo(() => makeFacadeTexture(3), []);
   const skyline = useMemo(() => makeSkylineTexture(), []);
   const store = useMemo(() => makeStorefrontTexture(), []);
-  const banner = useMemo(() => makeBannerTexture(), []);
+  const corrugated = useMemo(() => {
+    const t = makeCorrugatedTexture();
+    t.repeat.set(3, 2);
+    return t;
+  }, []);
+  const martBanner = useMemo(() => makeBannerTexture("24H MART", "#1c8a3c", true), []);
+  const garageBanner = useMemo(() => makeBannerTexture("GARAGE", "#e6e9f2", false, "#171b28"), []);
   const sign1 = useMemo(() => makeSignTexture("ラーメン", "#ff4fd8"), []);
   const sign2 = useMemo(() => makeSignTexture("居酒屋", "#4fd8ff"), []);
   const sign3 = useMemo(() => makeSignTexture("カラオケ", "#ffb43f"), []);
@@ -153,20 +215,20 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       <Backdrop skyline={skyline} />
 
       {/* --- Shop front wall (framed around the door opening) --- */}
-      {/* Left panel — lit storefront window */}
+      {/* Left panel — corrugated metal */}
       <mesh position={[-(SHOP_W / 2 + DOOR_W / 2) / 2 - DOOR_W / 4, SHOP_H / 2, 0]} castShadow>
         <boxGeometry args={[SHOP_W / 2 - DOOR_W / 2, SHOP_H, 0.2]} />
-        <meshStandardMaterial map={store} emissiveMap={store} emissive="#fff4dc" emissiveIntensity={0.8} roughness={0.5} metalness={0.2} />
+        <meshStandardMaterial map={corrugated} metalness={0.6} roughness={0.55} />
       </mesh>
-      {/* Right panel — lit storefront window */}
+      {/* Right panel — corrugated metal */}
       <mesh position={[(SHOP_W / 2 + DOOR_W / 2) / 2 + DOOR_W / 4, SHOP_H / 2, 0]} castShadow>
         <boxGeometry args={[SHOP_W / 2 - DOOR_W / 2, SHOP_H, 0.2]} />
-        <meshStandardMaterial map={store} emissiveMap={store} emissive="#fff4dc" emissiveIntensity={0.8} roughness={0.5} metalness={0.2} />
+        <meshStandardMaterial map={corrugated} metalness={0.6} roughness={0.55} />
       </mesh>
       {/* Lintel above the door */}
       <mesh position={[0, DOOR_H + (SHOP_H - DOOR_H) / 2, 0]} castShadow>
         <boxGeometry args={[DOOR_W, SHOP_H - DOOR_H, 0.2]} />
-        <meshStandardMaterial color={WALL} metalness={0.3} roughness={0.7} />
+        <meshStandardMaterial map={corrugated} metalness={0.6} roughness={0.55} />
       </mesh>
 
       {/* Side + back walls, roof, interior floor */}
@@ -201,14 +263,12 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <meshStandardMaterial color="#4fd8ff" emissive="#4fd8ff" emissiveIntensity={2.4} toneMapped={false} />
       </mesh>
 
-      {/* Shop banner above the door */}
-      <mesh position={[0, DOOR_H + 1.15, 0.16]}>
-        <boxGeometry args={[4.4, 0.7, 0.06]} />
-        <meshStandardMaterial map={banner} emissiveMap={banner} emissive="#ffffff" emissiveIntensity={0.9} toneMapped={false} />
+      {/* GARAGE sign above the roll-up door */}
+      <mesh position={[0, DOOR_H + 0.55, 0.16]}>
+        <boxGeometry args={[4.2, 0.6, 0.06]} />
+        <meshStandardMaterial map={garageBanner} emissiveMap={garageBanner} emissive="#8fb2ff" emissiveIntensity={0.5} toneMapped={false} />
       </mesh>
-      {/* Awning over the storefront */}
-      <Awning position={[0, DOOR_H + 0.25, 0.9]} width={SHOP_W - 0.4} />
-      {/* AC units + drainpipe on the shop face */}
+      {/* AC units + drainpipe on the garage face */}
       <ACUnit position={[-4.3, 4.4, 0.35]} />
       <ACUnit position={[4.2, 4.7, 0.35]} />
       <Pipe position={[-4.95, 2.7, 0.2]} height={5.4} />
@@ -226,22 +286,25 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
 
       <GarageDoor onEnter={onEnter} live={doorLive} />
 
+      {/* --- 24H convenience store, to the right of the garage --- */}
+      <MartBuilding x={8.5} facade={facade} store={store} banner={martBanner} />
+
       {/* --- Apartment block behind the shop --- */}
       <FacadeBox position={[0, 6.5, -13]} args={[14, 13, 3]} repeat={[5, 5]} facade={facade} />
 
       {/* --- Framing buildings along the street --- */}
       <FacadeBox position={[-11, 4, -3]} args={[6, 8, 12]} repeat={[3, 4]} facade={facade} />
-      <FacadeBox position={[11, 5, -3]} args={[6, 10, 12]} repeat={[3, 5]} facade={facade} />
-      {/* Vertical neon signboards mounted on the neighbouring buildings */}
+      <FacadeBox position={[16, 5, -3]} args={[6, 10, 12]} repeat={[3, 5]} facade={facade} />
+      {/* Vertical neon signboards */}
       <NeonSign tex={sign1} position={[-7.95, 4.2, 2.5]} rotation={[0, Math.PI / 2, 0]} scale={1.2} />
-      <NeonSign tex={sign2} position={[7.95, 3.6, 1.5]} rotation={[0, -Math.PI / 2, 0]} scale={1.15} />
-      <NeonSign tex={sign3} position={[9.6, 6, 3.06]} scale={1.1} />
+      <NeonSign tex={sign2} position={[11.4, 3.7, 0.2]} scale={1.05} />
+      <NeonSign tex={sign3} position={[14.5, 6, 3.06]} scale={1.1} />
 
-      {/* Bushes + trash by the storefront */}
-      <Bush position={[-4.4, 0, 1.3]} scale={1.1} />
-      <Bush position={[3.6, 0, 1.4]} scale={0.9} />
-      <TrashCan position={[2.6, 0.45, 1.2]} />
-      <TrashCan position={[3.1, 0.45, 1.35]} />
+      {/* Bushes + trash by the garage / store */}
+      <Bush position={[-4.6, 0, 1.5]} scale={1.1} />
+      <Bush position={[5.4, 0, 1.5]} scale={0.9} />
+      <TrashCan position={[6.2, 0.45, 1.3]} />
+      <TrashCan position={[6.7, 0.45, 1.45]} />
 
       {/* Overhead power lines crossing the street (silhouette against the
           lit buildings) */}
@@ -256,11 +319,22 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         </mesh>
       ))}
 
-      {/* Faint centre-line dashes down the wet road */}
-      {[3, 5.5, 8, 10.5].map((z) => (
-        <mesh key={z} position={[0, 0.02, z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.28, 1.1]} />
-          <meshStandardMaterial color="#c9b877" emissive="#7a6a2e" emissiveIntensity={0.5} roughness={0.7} />
+      {/* Sidewalk in front of the buildings (between them and the road) */}
+      <mesh position={[0, 0.06, 1.5]} receiveShadow>
+        <boxGeometry args={[60, 0.12, 2.6]} />
+        <meshStandardMaterial color="#33384a" roughness={0.95} metalness={0.1} />
+      </mesh>
+      {/* Curb edge */}
+      <mesh position={[0, 0.09, 2.78]}>
+        <boxGeometry args={[60, 0.18, 0.16]} />
+        <meshStandardMaterial color="#4a4f60" roughness={0.9} />
+      </mesh>
+
+      {/* Centre-line dashes running ALONG the street (left-to-right) */}
+      {Array.from({ length: 13 }).map((_, i) => (
+        <mesh key={i} position={[-18 + i * 3, 0.02, 6]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1.3, 0.26]} />
+          <meshStandardMaterial color="#d8c98c" emissive="#8a7838" emissiveIntensity={0.5} roughness={0.7} />
         </mesh>
       ))}
 

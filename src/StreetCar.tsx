@@ -13,7 +13,7 @@ export function StreetCar({
 }) {
   return (
     <group position={position} rotation={[0, facing, 0]}>
-      <CarModel bodyColor={color} accent={color} glow={0.4} headlights={false} />
+      <CarModel bodyColor={color} accent={color} glow={0.4} headlights={false} openHood={false} />
     </group>
   );
 }

@@ -4,6 +4,7 @@ import { MeshReflectorMaterial, Environment, Lightformer } from "@react-three/dr
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { STREET, ENTRANCE, buildCarSlots, STREET_CARS, type CameraPose, type CarSlot } from "./layout";
+import { makeRoadTexture } from "./textures";
 import { Car } from "./Car";
 import { StreetCar } from "./StreetCar";
 import { Scene3D } from "./Building";
@@ -42,6 +43,11 @@ function Scene({
 }) {
   const atEntrance = view === "entrance";
   const pose = activeCar ? activeCar.cameraPose : view === "street" ? STREET : ENTRANCE;
+  const road = useMemo(() => {
+    const t = makeRoadTexture();
+    t.repeat.set(8, 8);
+    return t;
+  }, []);
 
   return (
     <>
@@ -66,20 +72,21 @@ function Scene({
       <pointLight position={[-6, 4.6, 7]} intensity={26} color="#fff0cf" distance={18} />
       <pointLight position={[6, 4.6, 7]} intensity={26} color="#fff0cf" distance={18} />
 
-      {/* Wet asphalt: one big reflective plane under the whole scene */}
+      {/* Battered wet asphalt: one big reflective plane under the whole scene */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} onClick={onBack}>
         <planeGeometry args={[60, 60]} />
         <MeshReflectorMaterial
           resolution={1024}
-          mirror={0.6}
-          mixStrength={1.3}
+          mirror={0.4}
+          mixStrength={1.1}
           blur={[300, 90]}
-          roughness={0.85}
+          roughness={0.9}
           depthScale={1}
           minDepthThreshold={0.4}
           maxDepthThreshold={1.2}
-          color="#06070f"
-          metalness={0.65}
+          map={road}
+          color="#3a3d48"
+          metalness={0.55}
         />
       </mesh>
 
