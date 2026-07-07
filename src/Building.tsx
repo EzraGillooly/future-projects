@@ -8,9 +8,8 @@ import {
   makeBannerTexture,
   makeCorrugatedTexture,
 } from "./textures";
-import { ACUnit, Pipe, Awning, Puddle, Manhole, Crosswalk } from "./Props";
+import { Pipe, Awning, Puddle, Manhole } from "./Props";
 import { CityBuildings } from "./CityBuildings";
-import { GLBModel } from "./Vehicle";
 import { Interior } from "./Interior";
 
 // A glowing vertical neon signboard mounted flat against a wall.
@@ -191,7 +190,6 @@ function MartBuilding({
         <meshStandardMaterial map={banner} emissiveMap={banner} emissive="#ffffff" emissiveIntensity={0.9} toneMapped={false} />
       </mesh>
       <Awning position={[0, 2.55, 0.75]} width={W - 0.3} />
-      <ACUnit position={[-1.8, 4.1, 0.3]} />
     </group>
   );
 }
@@ -250,15 +248,9 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <boxGeometry args={[4.2, 0.6, 0.06]} />
         <meshStandardMaterial map={garageBanner} emissiveMap={garageBanner} emissive="#8fb2ff" emissiveIntensity={0.5} toneMapped={false} />
       </mesh>
-      {/* AC units + drainpipe on the garage face */}
-      <ACUnit position={[-4.3, 4.4, 0.35]} />
-      <ACUnit position={[4.2, 4.7, 0.35]} />
+      {/* Drainpipes on the garage face */}
       <Pipe position={[-4.95, 2.7, 0.2]} height={5.4} />
       <Pipe position={[4.95, 2.7, 0.2]} height={5.4} />
-
-      {/* A vending machine (real model) beside the door + its glow */}
-      <GLBModel url="/models/vending-machine.glb" position={[3.3, 0, 0.7]} rotation={[0, 0, 0]} height={1.9} />
-      <pointLight position={[3.3, 1.4, 1.4]} intensity={4} color="#9fd6ff" distance={5} />
 
       <GarageDoor onEnter={onEnter} live={doorLive} />
 
@@ -300,10 +292,9 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <meshStandardMaterial color="#4a4f60" roughness={0.9} />
       </mesh>
 
-      {/* Ground detail: manholes + a crosswalk */}
+      {/* Ground detail: manholes */}
       <Manhole position={[3, 0.02, 5.5]} />
       <Manhole position={[-7.5, 0.02, 7]} />
-      <Crosswalk x={7} />
 
       {/* Puddles catching the neon (wet night) */}
       <Puddle position={[2, 0.015, 3.2]} scale={[1.6, 1.0]} rotation={0.3} />
@@ -320,18 +311,6 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         </mesh>
       ))}
 
-      {/* Street lamps (real models) on the sidewalk + a warm glow at each head */}
-      {[7, -9].map((x) => (
-        <group key={x}>
-          <GLBModel url="/models/streetlight.glb" position={[x, 0, 2.7]} rotation={[0, x < 0 ? -Math.PI / 2 : Math.PI / 2, 0]} height={6} />
-          <pointLight position={[x, 5.4, 3.5]} intensity={22} color="#ffe6b0" distance={16} />
-        </group>
-      ))}
-
-      {/* Big dumpster in the alley, against the 24H mart's side wall + litter */}
-      <GLBModel url="/models/dumpster.glb" position={[-9.7, 0, -1]} rotation={[0, Math.PI / 2, 0]} length={2.4} />
-      <GLBModel url="/models/debris-papers.glb" position={[-8.5, 0.02, 0.6]} rotation={[0, 0.4, 0]} length={0.8} />
-      <GLBModel url="/models/debris-papers.glb" position={[-2.2, 0.02, 6.4]} rotation={[0, 1.3, 0]} length={0.7} />
     </group>
   );
 }
