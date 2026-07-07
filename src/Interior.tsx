@@ -2,13 +2,13 @@ import { GLBModel } from "./Vehicle";
 
 // The expanded garage interior — bigger than the exterior footprint (fine: the
 // camera never sees both at once). A deep main bay, a back loft/hangout, and a
-// left extension with a car lift. The exterior street facade is untouched.
+// right extension with a car lift. The exterior street facade is untouched.
 
 // Interior bounds (world units). Front (z=0) keeps the real door opening.
-const L = -11; // left wall x
-const R = 6; // right wall x
+const L = -6; // left wall x
+const R = 11; // right wall x
 const BACK = -18; // back wall z
-const H = 6; // ceiling height
+const H = 5.5; // ceiling height (matches the exterior garage front)
 const WALL = "#161b2e";
 const WALL2 = "#12172a";
 
@@ -36,22 +36,22 @@ function Loft() {
   const zC = -16; // deck centre
   const w = 11;
   const d = 4;
-  const xC = -2.5;
+  const xC = 2.5;
   return (
     <group>
       {/* Deck */}
       <Box position={[xC, y, zC]} args={[w, 0.2, d]} color="#20263c" castShadow receiveShadow />
       {/* Support posts under the front edge */}
-      {[-7, -2.5, 2].map((x) => (
+      {[7, 2.5, -2].map((x) => (
         <Box key={x} position={[x, y / 2, zC + d / 2 - 0.2]} args={[0.2, y, 0.2]} color="#0d1120" />
       ))}
       {/* Front railing */}
       <Box position={[xC, y + 0.45, zC + d / 2]} args={[w, 0.08, 0.08]} color="#3a4560" />
-      {[-7.6, 2.4].map((x) => (
+      {[7.6, -2.4].map((x) => (
         <Box key={x} position={[x, y + 0.22, zC + d / 2]} args={[0.08, 0.45, 0.08]} color="#2a3350" />
       ))}
       {/* Staircase up to the loft (real model) */}
-      <GLBModel url="/models/staircase.glb" position={[2.6, 0, -10.6]} height={2.9} />
+      <GLBModel url="/models/staircase.glb" position={[-2.6, 0, -10.6]} height={2.9} />
 
       {/* Hangout dressing on the deck */}
       {/* Rug */}
@@ -60,12 +60,12 @@ function Loft() {
         <meshStandardMaterial color="#3a2140" roughness={1} />
       </mesh>
       {/* L-couch */}
-      <Box position={[xC - 1.6, y + 0.45, zC - 0.6]} args={[1.0, 0.7, 2.4]} color="#2b2f45" castShadow />
-      <Box position={[xC - 0.6, y + 0.45, zC - 1.6]} args={[2.6, 0.7, 1.0]} color="#2b2f45" castShadow />
+      <Box position={[xC + 1.6, y + 0.45, zC - 0.6]} args={[1.0, 0.7, 2.4]} color="#2b2f45" castShadow />
+      <Box position={[xC + 0.6, y + 0.45, zC - 1.6]} args={[2.6, 0.7, 1.0]} color="#2b2f45" castShadow />
       {/* Coffee table */}
       <Box position={[xC, y + 0.35, zC + 0.2]} args={[1.2, 0.1, 0.7]} color="#14100c" />
       {/* TV on the back wall, glowing */}
-      <mesh position={[xC + 2.6, y + 1.1, BACK + 0.12]}>
+      <mesh position={[xC - 2.6, y + 1.1, BACK + 0.12]}>
         <boxGeometry args={[2.2, 1.3, 0.08]} />
         <meshStandardMaterial color="#0a0d16" emissive="#3a6bd8" emissiveIntensity={1.6} toneMapped={false} />
       </mesh>
@@ -76,7 +76,7 @@ function Loft() {
 }
 
 function Lift() {
-  const x = -8;
+  const x = 8;
   const z = -3.5;
   const deckY = 1.5;
   return (
@@ -112,8 +112,8 @@ export function Interior() {
       <Box position={[R, H / 2, zMid]} args={[0.2, H, depth]} color={WALL2} />
       {/* Back wall */}
       <Box position={[(L + R) / 2, H / 2, BACK]} args={[width, H, 0.2]} color={WALL2} />
-      {/* Front wall closing the left extension (left of the door panels) */}
-      <Box position={[(L - 5) / 2, H / 2, 0]} args={[-5 - L, H, 0.2]} color={WALL2} />
+      {/* Front wall closing the right extension (right of the door panels) */}
+      <Box position={[(R + 5) / 2, H / 2, 0]} args={[R - 5, H, 0.2]} color={WALL2} />
       {/* Ceiling */}
       <Box position={[(L + R) / 2, H, zMid]} args={[width, 0.2, depth]} color="#0e1220" castShadow />
       {/* Interior floor (concrete over the wet road) */}
@@ -136,7 +136,7 @@ export function Interior() {
       <Lift />
 
       {/* General warm fill so the deeper space reads */}
-      <pointLight position={[-2, 3.6, -8]} intensity={22} color="#ffa24d" distance={20} />
+      <pointLight position={[2, 3.6, -8]} intensity={22} color="#ffa24d" distance={20} />
       <pointLight position={[0, 3.6, -3]} intensity={20} color="#ffb26b" distance={14} />
     </group>
   );

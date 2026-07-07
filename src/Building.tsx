@@ -8,7 +8,7 @@ import {
   makeBannerTexture,
   makeCorrugatedTexture,
 } from "./textures";
-import { ACUnit, Pipe, Bush, TrashCan, Awning, Puddle, Manhole, Crosswalk } from "./Props";
+import { ACUnit, Pipe, Awning, Puddle, Manhole, Crosswalk } from "./Props";
 import { CityBuildings } from "./CityBuildings";
 import { GLBModel } from "./Vehicle";
 import { Interior } from "./Interior";
@@ -230,6 +230,17 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         <boxGeometry args={[DOOR_W, SHOP_H - DOOR_H, 0.2]} />
         <meshStandardMaterial map={corrugated} metalness={0.6} roughness={0.55} />
       </mesh>
+      {/* Exterior wall wrapping the right lift-bay extension so the wider garage
+          reads as one building and the interior no longer shows on the street */}
+      <mesh position={[8, SHOP_H / 2, 0]} castShadow>
+        <boxGeometry args={[6, SHOP_H, 0.25]} />
+        <meshStandardMaterial map={corrugated} metalness={0.6} roughness={0.55} />
+      </mesh>
+      {/* Roof capping the (now wider) garage */}
+      <mesh position={[3, SHOP_H + 0.12, -4.5]} castShadow>
+        <boxGeometry args={[16.6, 0.3, 11]} />
+        <meshStandardMaterial color="#0e1220" metalness={0.4} roughness={0.6} />
+      </mesh>
 
       {/* Expanded interior (walls, floor, ceiling, loft, lift) */}
       <Interior />
@@ -245,20 +256,14 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       <Pipe position={[-4.95, 2.7, 0.2]} height={5.4} />
       <Pipe position={[4.95, 2.7, 0.2]} height={5.4} />
 
-      {/* Vending machines to the left of the door */}
-      <mesh position={[-2.9, 0.9, 0.55]} castShadow>
-        <boxGeometry args={[0.7, 1.8, 0.6]} />
-        <meshStandardMaterial color="#c0243a" emissive="#ff3355" emissiveIntensity={0.7} />
-      </mesh>
-      <mesh position={[-3.65, 0.9, 0.55]} castShadow>
-        <boxGeometry args={[0.7, 1.8, 0.6]} />
-        <meshStandardMaterial color="#1c6fb0" emissive="#2b9dff" emissiveIntensity={0.7} />
-      </mesh>
+      {/* A vending machine (real model) beside the door + its glow */}
+      <GLBModel url="/models/vending-machine.glb" position={[3.3, 0, 0.7]} rotation={[0, 0, 0]} height={1.9} />
+      <pointLight position={[3.3, 1.4, 1.4]} intensity={4} color="#9fd6ff" distance={5} />
 
       <GarageDoor onEnter={onEnter} live={doorLive} />
 
-      {/* --- 24H convenience store, to the right of the garage --- */}
-      <MartBuilding x={8.5} facade={facade} store={store} banner={martBanner} />
+      {/* --- 24H convenience store, to the left of the garage --- */}
+      <MartBuilding x={-8.5} facade={facade} store={store} banner={martBanner} />
 
       {/* --- Apartment block (moved back, clear of the expanded interior) --- */}
       <FacadeBox position={[0, 8, -26]} args={[18, 16, 3]} repeat={[6, 6]} facade={facade} />
@@ -267,15 +272,9 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       <CityBuildings />
 
       {/* Vertical neon signboards */}
-      <NeonSign tex={sign1} position={[-12.9, 4.2, 1]} rotation={[0, Math.PI / 2, 0]} scale={1.2} />
-      <NeonSign tex={sign2} position={[11.4, 3.7, 0.2]} scale={1.05} />
-      <NeonSign tex={sign3} position={[14.5, 6, 3.06]} scale={1.1} />
-
-      {/* Bushes + trash by the garage / store */}
-      <Bush position={[-4.6, 0, 1.5]} scale={1.1} />
-      <Bush position={[5.4, 0, 1.5]} scale={0.9} />
-      <TrashCan position={[6.2, 0.45, 1.3]} />
-      <TrashCan position={[6.7, 0.45, 1.45]} />
+      <NeonSign tex={sign1} position={[12.9, 4.2, 1]} rotation={[0, -Math.PI / 2, 0]} scale={1.2} />
+      <NeonSign tex={sign2} position={[-11.4, 3.7, 0.2]} scale={1.05} />
+      <NeonSign tex={sign3} position={[-14.5, 6, 3.06]} scale={1.1} />
 
       {/* Overhead power lines crossing the street (silhouette against the
           lit buildings) */}
@@ -302,16 +301,16 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
       </mesh>
 
       {/* Ground detail: manholes + a crosswalk */}
-      <Manhole position={[-3, 0.02, 5.5]} />
-      <Manhole position={[7.5, 0.02, 7]} />
-      <Crosswalk x={-1} z={7.6} />
+      <Manhole position={[3, 0.02, 5.5]} />
+      <Manhole position={[-7.5, 0.02, 7]} />
+      <Crosswalk x={1} z={7.6} />
 
       {/* Puddles catching the neon (wet night) */}
-      <Puddle position={[-2, 0.015, 3.2]} scale={[1.6, 1.0]} rotation={0.3} />
-      <Puddle position={[4.5, 0.015, 4.2]} scale={[2.1, 1.3]} rotation={-0.4} />
-      <Puddle position={[-6.5, 0.015, 5]} scale={[1.4, 0.9]} rotation={0.1} />
-      <Puddle position={[1.5, 0.015, 7]} scale={[2.4, 1.2]} rotation={0.5} />
-      <Puddle position={[9, 0.015, 3.4]} scale={[1.3, 0.9]} rotation={-0.2} />
+      <Puddle position={[2, 0.015, 3.2]} scale={[1.6, 1.0]} rotation={0.3} />
+      <Puddle position={[-4.5, 0.015, 4.2]} scale={[2.1, 1.3]} rotation={-0.4} />
+      <Puddle position={[6.5, 0.015, 5]} scale={[1.4, 0.9]} rotation={0.1} />
+      <Puddle position={[-1.5, 0.015, 7]} scale={[2.4, 1.2]} rotation={0.5} />
+      <Puddle position={[-9, 0.015, 3.4]} scale={[1.3, 0.9]} rotation={-0.2} />
 
       {/* Centre-line dashes running ALONG the street (left-to-right) */}
       {Array.from({ length: 13 }).map((_, i) => (
@@ -321,20 +320,18 @@ export function Scene3D({ onEnter, doorLive }: { onEnter: () => void; doorLive: 
         </mesh>
       ))}
 
-      {/* Street lamps (real models) + a warm glow at each head */}
-      {[-8, 6].map((x) => (
+      {/* Street lamps (real models) on the sidewalk + a warm glow at each head */}
+      {[8, -6].map((x) => (
         <group key={x}>
           <GLBModel url="/models/streetlight.glb" position={[x, 0, 2.7]} rotation={[0, x < 0 ? -Math.PI / 2 : Math.PI / 2, 0]} height={6} />
           <pointLight position={[x, 5.4, 3.5]} intensity={22} color="#ffe6b0" distance={16} />
         </group>
       ))}
 
-      {/* Alley clutter by the left building: dumpster, trash bags, litter */}
-      <GLBModel url="/models/dumpster.glb" position={[-7.6, 0, 1.7]} rotation={[0, Math.PI / 2, 0]} length={2.4} />
-      <GLBModel url="/models/trash-bag.glb" position={[-6.4, 0, 1.5]} rotation={[0, 0.6, 0]} height={0.7} />
-      <GLBModel url="/models/trash-bag.glb" position={[-6.1, 0, 2.1]} rotation={[0, -1.2, 0]} height={0.62} />
-      <GLBModel url="/models/debris-papers.glb" position={[-5.4, 0.02, 2.4]} rotation={[0, 0.4, 0]} length={0.8} />
-      <GLBModel url="/models/debris-papers.glb" position={[2.2, 0.02, 6.4]} rotation={[0, 1.3, 0]} length={0.7} />
+      {/* A dumpster + a little litter by the garage's right side */}
+      <GLBModel url="/models/dumpster.glb" position={[7.6, 0, 1.7]} rotation={[0, Math.PI / 2, 0]} length={2.4} />
+      <GLBModel url="/models/debris-papers.glb" position={[5.4, 0.02, 2.4]} rotation={[0, 0.4, 0]} length={0.8} />
+      <GLBModel url="/models/debris-papers.glb" position={[-2.2, 0.02, 6.4]} rotation={[0, 1.3, 0]} length={0.7} />
     </group>
   );
 }

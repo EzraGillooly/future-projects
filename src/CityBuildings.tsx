@@ -102,13 +102,13 @@ interface Spec {
 // Curated, varied placements around the foreground (garage at x0, mart ~x8.5).
 // Kept clear of the expanded interior footprint (x in [-11,6], z in [-18,0]).
 const SPECS: Spec[] = [
-  { pos: [-17, 0, -4], w: 8, h: 15, d: 12, tex: 1, tint: "#4c515f", setback: 3, roof: "tank" },
-  { pos: [-14, 0, -26], w: 8, h: 20, d: 6, tex: 2, tint: "#565b6d", roof: "antenna" },
-  { pos: [-2, 0, -30], w: 12, h: 15, d: 5, tex: 3, tint: "#4a4f5e", roof: "billboard", billboardColor: "#ff4fd8" },
-  { pos: [11, 0, -26], w: 8, h: 24, d: 6, tex: 1, tint: "#5a5f72", setback: 4, roof: "antenna" },
-  { pos: [16, 0, -3], w: 6, h: 10, d: 12, tex: 2, tint: "#4e5364", roof: "tank" },
-  { pos: [24, 0, -12], w: 8, h: 17, d: 8, tex: 0, tint: "#565b6d", roof: "billboard", billboardColor: "#4fd8ff" },
-  { pos: [-25, 0, -8], w: 7, h: 12, d: 10, tex: 3, tint: "#4a4f5e", roof: "ac" },
+  { pos: [17, 0, -4], w: 8, h: 15, d: 12, tex: 1, tint: "#4c515f", setback: 3, roof: "tank" },
+  { pos: [14, 0, -26], w: 8, h: 20, d: 6, tex: 2, tint: "#565b6d", roof: "antenna" },
+  { pos: [2, 0, -30], w: 12, h: 15, d: 5, tex: 3, tint: "#4a4f5e", roof: "billboard", billboardColor: "#ff4fd8" },
+  { pos: [-11, 0, -26], w: 8, h: 24, d: 6, tex: 1, tint: "#5a5f72", setback: 4, roof: "antenna" },
+  { pos: [-16, 0, -3], w: 6, h: 10, d: 12, tex: 2, tint: "#4e5364", roof: "tank" },
+  { pos: [-24, 0, -12], w: 8, h: 17, d: 8, tex: 0, tint: "#565b6d", roof: "billboard", billboardColor: "#4fd8ff" },
+  { pos: [25, 0, -8], w: 7, h: 12, d: 10, tex: 3, tint: "#4a4f5e", roof: "ac" },
 ];
 
 function VariedBuilding({ spec, facade }: { spec: Spec; facade: THREE.Texture }) {
