@@ -67,6 +67,19 @@ city depth. To add more "place" detail, extend this file with more canvas textur
 kanji boards, AC units, posters) rather than more geometry. Seeded RNG keeps layouts stable
 across reloads.
 
+### Deferred (Ezra asked, not yet done)
+
+- **Building differentiation** — the neighbour buildings are too uniformly square and share
+  one facade seed. Vary their silhouettes (setbacks, different heights/widths, rooftop
+  props) and give each its own facade seed/tint so they stop looking identical.
+
+### Real car assets (for replacing the primitive cars)
+
+Free glTF/`.glb` sources, low-poly first: **Poly Pizza** (poly.pizza, CC0, best fit),
+**Kenney** (kenney.nl Car/Racing kits, CC0), **Quaternius** (CC0). Higher detail:
+**Sketchfab** filtered to Downloadable + CC0/CC-BY (credit CC-BY). Drop `.glb` into
+`public/models/`, load with drei `useGLTF`, swap per car; prefer Draco-compressed.
+
 ### Still open / next ideas
 
 - Lofi + rain **audio bed** (needs a real loop file to bundle).
