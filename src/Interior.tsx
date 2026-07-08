@@ -1,13 +1,12 @@
 import { useMemo } from "react";
-import { GLBModel } from "./Vehicle";
 import { makeApronTexture } from "./textures";
 import {
   Couch,
   Rug,
   LowTable,
+  ArmChair,
   MediaConsole,
   MangaShelf,
-  FramedArt,
   Poster,
   NeonBarSign,
   FloorLamp,
@@ -17,7 +16,6 @@ import {
   ToolChest,
   Workbench,
   TireStack,
-  OilDrum,
   EngineStand,
   StringLights,
 } from "./InteriorDressing";
@@ -52,14 +50,62 @@ function Box({
   );
 }
 
+// A railing run between two deck-edge points: a top rail + evenly spaced balusters.
+function Railing({ x1, z1, x2, z2, y }: { x1: number; z1: number; x2: number; z2: number; y: number }) {
+  const dx = x2 - x1;
+  const dz = z2 - z1;
+  const len = Math.hypot(dx, dz);
+  const n = Math.max(2, Math.round(len / 0.9));
+  const angle = Math.atan2(dz, dx);
+  return (
+    <group>
+      <mesh position={[(x1 + x2) / 2, y + 0.52, (z1 + z2) / 2]} rotation={[0, -angle, 0]}>
+        <boxGeometry args={[len, 0.08, 0.08]} />
+        <meshStandardMaterial color="#3a4560" />
+      </mesh>
+      {Array.from({ length: n + 1 }).map((_, i) => {
+        const t = i / n;
+        return (
+          <mesh key={i} position={[x1 + dx * t, y + 0.26, z1 + dz * t]}>
+            <boxGeometry args={[0.05, 0.5, 0.05]} />
+            <meshStandardMaterial color="#2a3350" />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+// A solid straight staircase climbing along X up to the deck, flush to a wall.
+// Each step is a block from the floor to its tread height, so it reads built-in.
+function Stairs({ x0, x1, top, z, width = 1.15, steps = 8 }: { x0: number; x1: number; top: number; z: number; width?: number; steps?: number }) {
+  const dx = (x1 - x0) / steps;
+  const dy = top / steps;
+  return (
+    <group>
+      {Array.from({ length: steps }).map((_, i) => {
+        const cx = x0 + dx * (i + 0.5);
+        const h = dy * (i + 1);
+        return (
+          <mesh key={i} position={[cx, h / 2, z]} castShadow receiveShadow>
+            <boxGeometry args={[Math.abs(dx) + 0.01, h, width]} />
+            <meshStandardMaterial color="#2a3350" roughness={0.85} metalness={0.1} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
 // The loft: deck spanning the back, chill lounge underneath, display on top.
 function Loft() {
   const y = 2.6; // deck top height
-  const zC = -14; // deck centre (z -11..-17)
-  const d = 6;
+  const d = 6.9; // extended back so the deck reaches the back wall
+  const zC = -14.45; // deck centre (z -11..-17.9, back edge on the wall)
   const xC = 1.5; // (x -3..6)
   const w = 9;
   const frontZ = zC + d / 2; // z = -11
+  const backZ = zC - d / 2; // z = -17.9 (against the back wall)
 
   return (
     <group>
@@ -72,28 +118,40 @@ function Loft() {
       {[-2.7, 5.7].map((x) => (
         <Box key={"pb" + x} position={[x, y / 2, zC - d / 2 + 0.15]} args={[0.18, y, 0.18]} color="#0d1120" />
       ))}
-      {/* Front railing + balusters */}
-      <Box position={[xC, y + 0.52, frontZ]} args={[w, 0.08, 0.08]} color="#3a4560" />
-      {Array.from({ length: 7 }).map((_, i) => (
-        <Box key={i} position={[-3 + 0.4 + i * (w - 0.8) / 6, y + 0.26, frontZ]} args={[0.05, 0.5, 0.05]} color="#2a3350" />
-      ))}
-      {/* Staircase up to the loft */}
-      <GLBModel url="/models/staircase.glb" position={[-2.4, 0, frontZ + 1.7]} height={2.7} />
+      {/* Safety railing around the deck. Deck spans x[-3, 6], z[-17.9, -11]; the
+          back edge is against the wall (no railing there), and the back-right is
+          left open as the stair landing. */}
+      <Railing x1={-3} z1={frontZ} x2={6} z2={frontZ} y={y} />
+      <Railing x1={-3} z1={frontZ} x2={-3} z2={backZ + 0.2} y={y} />
+      <Railing x1={6} z1={frontZ} x2={6} z2={-16} y={y} />
+      {/* Staircase — back-right, flush against the back wall and parallel to it,
+          climbing from x=9 up to the deck's back-right edge (clear of the cars) */}
+      <Stairs x0={9} x1={6} top={y} z={backZ + 0.65} />
 
       {/* ================= CHILL LOUNGE — underneath the deck ================= */}
-      <Rug position={[1.5, 0.03, -14]} size={[4.4, 3.2]} color="#4a1f3a" />
-      {/* couch tucked at the back, looking out toward the door/cars */}
-      <Couch position={[1.4, 0, -16]} rotation={0} w={2.6} color="#3a2f45" />
-      <LowTable position={[1.4, 0, -14.2]} />
-      {/* arcade cabinet + mini fridge + lamp + plant */}
-      <Arcade position={[-2.2, 0, -16.4]} rotation={0.4} color="#5a1f6a" />
-      <MiniFridge position={[5.1, 0, -16.4]} rotation={-0.3} />
-      <FloorLamp position={[4.7, 0, -12.3]} color="#ffb26b" />
-      <PottedPlant position={[-2.5, 0, -12.2]} scale={1.1} />
+      {/* Left wall: TV nook — couch on the rug facing the wall-mounted TV, table between */}
+      <Rug position={[-4.5, 0.03, -14.5]} size={[2.8, 3.6]} color="#4a1f3a" />
+      <Couch position={[-4.0, 0, -14.5]} rotation={-Math.PI / 2} w={2.4} color="#3a2f45" />
+      <LowTable position={[-5.0, 0, -14.5]} rotation={-Math.PI / 2} />
+      {/* wall-mounted TV on the left wall, screen facing into the room (+X) */}
+      <mesh position={[-5.88, 1.5, -14.5]} rotation={[0, Math.PI / 2, 0]}>
+        <boxGeometry args={[2.0, 1.2, 0.08]} />
+        <meshStandardMaterial color="#0a0d16" emissive="#3a6bd8" emissiveIntensity={1.6} toneMapped={false} />
+      </mesh>
+      <FloorLamp position={[-3.2, 0, -16.3]} color="#ffb26b" />
+      <PottedPlant position={[-2.7, 0, -12.4]} scale={1.1} />
+      {/* Right side: two armchairs facing the garage (+Z), grouped on a small rug */}
+      <Rug position={[4.3, 0.03, -14.6]} size={[3.4, 2.8]} color="#3a2140" />
+      <ArmChair position={[3.4, 0, -15.2]} rotation={0} color="#3a2f45" />
+      <ArmChair position={[5.2, 0, -15.2]} rotation={0} color="#3a2f45" />
+      <LowTable position={[4.3, 0, -13.4]} />
+      <Arcade position={[4.7, 0, -16.8]} rotation={-0.3} color="#5a1f6a" />
+      <MiniFridge position={[2.9, 0, -16.6]} rotation={0.2} />
       {/* festoon string lights under the deck front edge */}
       <StringLights from={[-2.8, 2.35, frontZ]} to={[5.8, 2.35, frontZ]} bulbs={9} />
-      {/* warm fill for the lounge */}
-      <pointLight position={[1.5, 2.1, -14]} intensity={12} color="#ffb26b" distance={9} />
+      {/* warm fill — one for each side of the lounge */}
+      <pointLight position={[-4.5, 2.1, -14.5]} intensity={10} color="#ffb26b" distance={8} />
+      <pointLight position={[4.3, 2.1, -14.5]} intensity={10} color="#ffb26b" distance={8} />
 
       {/* ================= DISPLAY — on top of the deck ================= */}
       <Rug position={[0.6, y + 0.11, -13.6]} size={[4.2, 2.6]} color="#3a2140" />
@@ -103,24 +161,11 @@ function Loft() {
         <MediaConsole position={[3.6, 0, -14]} rotation={-Math.PI / 2} />
         <FloorLamp position={[-2.2, 0, -13]} color="#ffd9a8" />
         <PottedPlant position={[5.2, 0, -12.6]} scale={1} />
-        {/* model-car / trophy shelf */}
-        <Box position={[-2.3, 0.9, -16.6]} args={[1.4, 0.06, 0.4]} color="#1a130c" />
-        {[-2.8, -2.3, -1.8].map((x, i) => (
-          <GLBModel key={i} url="/models/nissan-gtr.glb" position={[x, 0.95, -16.6]} length={0.55} />
-        ))}
       </group>
-      {/* manga shelf + framed art on the back wall above the deck */}
+      {/* manga shelf on the back wall above the deck */}
       <MangaShelf position={[3.9, y + 1.0, -17.7]} w={2.0} />
-      <FramedArt position={[-1.2, y + 1.5, -17.78]} w={1.0} h={1.2} seed={1} />
-      <FramedArt position={[0.1, y + 1.4, -17.78]} w={0.8} h={1.0} seed={2} />
-      <FramedArt position={[1.3, y + 1.55, -17.78]} w={1.0} h={1.3} seed={3} />
       {/* neon word sign over the display */}
       <NeonBarSign position={[1.5, y + 2.5, -17.6]} w={3.0} color="#ff4fd8" />
-      {/* TV on the back wall for the lounge below to see */}
-      <mesh position={[-3.4, y - 1.0, -17.85]}>
-        <boxGeometry args={[2.0, 1.2, 0.08]} />
-        <meshStandardMaterial color="#0a0d16" emissive="#3a6bd8" emissiveIntensity={1.6} toneMapped={false} />
-      </mesh>
       {/* warm display light */}
       <pointLight position={[1.5, y + 1.8, -13.5]} intensity={14} color="#ffcf8f" distance={9} />
     </group>
@@ -140,9 +185,6 @@ function Lift() {
       {[-0.9, 0.9].map((z2) => (
         <Box key={z2} position={[0, deckY, z2]} args={[2.4, 0.14, 0.4]} color="#8a7820" />
       ))}
-      <group position={[0, deckY + 0.12, 0]}>
-        <GLBModel url="/models/nissan-180sx.glb" position={[0, 0, 0]} rotation={[0, 0, 0]} length={4.1} />
-      </group>
       <pointLight position={[0, 3.4, 1.5]} intensity={14} color="#eaf2ff" distance={9} />
     </group>
   );
@@ -153,15 +195,13 @@ function Lift() {
 function GroundShop() {
   return (
     <group>
-      {/* Left-wall work zone: bench + pegboard, tool chest, tyres, drums */}
-      <Workbench position={[-5.2, 0, -10]} rotation={Math.PI / 2} w={3.0} />
-      <ToolChest position={[-5.3, 0, -6.5]} rotation={Math.PI / 2} />
-      <TireStack position={[-5.2, 0, -13.5]} count={4} />
-      <OilDrum position={[-5.4, 0, -3.5]} color="#2f6f3c" />
-      <OilDrum position={[-4.7, 0, -3.4]} color="#8a6a1c" />
-      {/* engine on a stand, right-centre behind the cars */}
+      {/* Left-wall work corner (forward of the lounge): bench + pegboard, tool chest */}
+      <Workbench position={[-5.2, 0, -11.2]} rotation={Math.PI / 2} w={3.0} />
+      <ToolChest position={[-5.3, 0, -8.4]} rotation={Math.PI / 2} />
+      {/* engine on a stand + tyres, right-centre / right wall behind the cars */}
       <EngineStand position={[6.4, 0, -8]} rotation={0.5} />
       <TireStack position={[10.2, 0, -8]} count={3} />
+      <TireStack position={[10.3, 0, -11]} count={4} />
 
       {/* Posters on the walls */}
       <Poster position={[L + 0.12, 3.6, -4.5]} rotation={Math.PI / 2} seed={1} />

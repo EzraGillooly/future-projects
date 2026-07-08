@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { MeshReflectorMaterial, Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
-import { STREET, ENTRANCE, buildCarSlots, STREET_CARS, type CameraPose, type CarSlot } from "./layout";
+import { STREET, ENTRANCE, SPOTS, buildCarSlots, STREET_CARS, type CameraPose, type CarSlot, type Spot } from "./layout";
 import { makeRoadTexture } from "./textures";
 import { Car } from "./Car";
 import { GLBModel, PassingCar } from "./Vehicle";
@@ -26,25 +26,78 @@ function CameraRig({ pose }: { pose: CameraPose }) {
   return null;
 }
 
+// An invisible clickable volume that glides the camera to a saved spot pose.
+// Raycastable while invisible (colorWrite off); a faint cyan fill on hover.
+function Hotspot({ spot, live, onSelect }: { spot: Spot; live: boolean; onSelect: () => void }) {
+  const [hovered, setHovered] = useState(false);
+  const hot = live && hovered;
+
+  useEffect(() => {
+    if (!hot) return;
+    document.body.style.cursor = "pointer";
+    return () => void (document.body.style.cursor = "auto");
+  }, [hot]);
+
+  return (
+    <group
+      position={spot.hotspot.position}
+      onClick={(e) => {
+        if (!live) return;
+        e.stopPropagation();
+        onSelect();
+      }}
+      onPointerOver={(e) => {
+        if (!live) return;
+        e.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={() => setHovered(false)}
+    >
+      {/* invisible raycast volume */}
+      <mesh>
+        <boxGeometry args={spot.hotspot.size} />
+        <meshBasicMaterial colorWrite={false} depthWrite={false} />
+      </mesh>
+      {/* faint highlight on hover */}
+      {hot && (
+        <mesh>
+          <boxGeometry args={spot.hotspot.size} />
+          <meshBasicMaterial color="#67e8f9" transparent opacity={0.1} depthWrite={false} toneMapped={false} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
 function Scene({
   cars,
   view,
   activeCar,
+  activeSpot,
   freeCam,
   onEnter,
   onSelect,
+  onSelectSpot,
   onBack,
 }: {
   cars: CarSlot[];
   view: View;
   activeCar: CarSlot | null;
+  activeSpot: Spot | null;
   freeCam: boolean;
   onEnter: () => void;
   onSelect: (id: string) => void;
+  onSelectSpot: (id: string) => void;
   onBack: () => void;
 }) {
   const atEntrance = view === "entrance";
-  const pose = activeCar ? activeCar.cameraPose : view === "street" ? STREET : ENTRANCE;
+  const pose = activeCar
+    ? activeCar.cameraPose
+    : activeSpot
+      ? activeSpot.pose
+      : view === "street"
+        ? STREET
+        : ENTRANCE;
   const road = useMemo(() => {
     const t = makeRoadTexture();
     t.repeat.set(8, 8);
@@ -120,6 +173,15 @@ function Scene({
         />
       ))}
 
+      {SPOTS.map((spot) => (
+        <Hotspot
+          key={spot.id}
+          spot={spot}
+          live={atEntrance && !activeCar}
+          onSelect={() => onSelectSpot(spot.id)}
+        />
+      ))}
+
       <Rain />
 
       <EffectComposer multisampling={4}>
@@ -177,11 +239,24 @@ export function App() {
   const cars = useMemo(buildCarSlots, []);
   const [view, setView] = useState<View>("street");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeSpotId, setActiveSpotId] = useState<string | null>(null);
   const [freeCam, setFreeCam] = useState(false);
   const activeCar = cars.find((c) => c.project.id === activeId) ?? null;
+  const activeSpot = SPOTS.find((s) => s.id === activeSpotId) ?? null;
 
+  const selectCar = (id: string) => {
+    setActiveId(id);
+    setActiveSpotId(null);
+  };
+  const selectSpot = (id: string) => {
+    setActiveSpotId(id);
+    setActiveId(null);
+  };
+
+  // Step back out one level: focused car/spot → entrance → street.
   const backOut = () => {
     if (activeId) setActiveId(null);
+    else if (activeSpotId) setActiveSpotId(null);
     else if (view === "entrance") setView("street");
   };
 
@@ -195,7 +270,7 @@ export function App() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const canGoBack = activeId !== null || view === "entrance";
+  const canGoBack = activeId !== null || activeSpotId !== null || view === "entrance";
 
   return (
     <>
@@ -212,9 +287,11 @@ export function App() {
           cars={cars}
           view={view}
           activeCar={activeCar}
+          activeSpot={activeSpot}
           freeCam={freeCam}
           onEnter={() => setView("entrance")}
-          onSelect={setActiveId}
+          onSelect={selectCar}
+          onSelectSpot={selectSpot}
           onBack={backOut}
         />
       </Canvas>
@@ -239,7 +316,7 @@ export function App() {
         </div>
       )}
       {canGoBack && (
-        <BackHint label={activeId ? "Back to garage" : "Back to street"} onClick={backOut} />
+        <BackHint label={activeId || activeSpotId ? "Back to garage" : "Back to street"} onClick={backOut} />
       )}
     </>
   );

@@ -103,3 +103,48 @@ export const STREET_PUDDLES: Puddle[] = [
   { position: [6.5, -0.01, 8.0], scale: [3.3, 2.0], rotation: -0.35, seed: 2 },
   { position: [-1, -0.01, 6.3], scale: [2.3, 1.4], rotation: 0.5, seed: 8 },
 ];
+
+// --- Interior camera spots (non-car) ----------------------------------------
+// Extra clickable areas that glide the camera to a saved pose (no popup — just a
+// viewpoint). Each carries an invisible hotspot volume (world coords) to click.
+// Live only at the entrance; Esc / back returns. Poses are in world coords.
+export interface Spot {
+  id: string;
+  pose: CameraPose;
+  hotspot: { position: [number, number, number]; size: [number, number, number] };
+}
+
+export const SPOTS: Spot[] = [
+  {
+    id: "loft",
+    pose: {
+      position: new THREE.Vector3(1.5, 4.0, -8.5),
+      target: new THREE.Vector3(0.5, 2.7, -15.5),
+    },
+    hotspot: { position: [-0.5, 3.1, -12], size: [7, 1.4, 4] },
+  },
+  {
+    id: "lounge",
+    pose: {
+      position: new THREE.Vector3(-3.2, 1.6, -10.5),
+      target: new THREE.Vector3(-6.5, 1.1, -14.5),
+    },
+    hotspot: { position: [-5.5, 1.0, -14.5], size: [2.6, 2.0, 3.2] },
+  },
+  {
+    id: "armchairs",
+    pose: {
+      position: new THREE.Vector3(2.8, 1.7, -9.5),
+      target: new THREE.Vector3(2.8, 0.8, -15),
+    },
+    hotspot: { position: [2.8, 1.0, -15], size: [3.6, 2.0, 2.6] },
+  },
+  {
+    id: "work",
+    pose: {
+      position: new THREE.Vector3(-3.5, 1.7, -6.5),
+      target: new THREE.Vector3(-6.6, 1.0, -10),
+    },
+    hotspot: { position: [-6.5, 1.1, -9.8], size: [1.8, 2.2, 4.5] },
+  },
+];

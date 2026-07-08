@@ -43,6 +43,38 @@ export function Couch({ position, rotation = 0, w = 2.4, color = "#3a3f52" }: { 
   );
 }
 
+// A single low armchair — a compact one-seater version of Couch.
+export function ArmChair({ position, rotation = 0, color = "#3a3f52" }: { position: Vec3; rotation?: number; color?: string }) {
+  const w = 0.95;
+  const d = 0.9;
+  return (
+    <group position={position} rotation={[0, rotation, 0]}>
+      {/* seat base */}
+      <mesh position={[0, 0.24, 0]} castShadow>
+        <boxGeometry args={[w, 0.3, d]} />
+        <meshStandardMaterial color={color} roughness={0.9} />
+      </mesh>
+      {/* back */}
+      <mesh position={[0, 0.52, -d / 2 + 0.1]} castShadow>
+        <boxGeometry args={[w, 0.56, 0.18]} />
+        <meshStandardMaterial color={color} roughness={0.9} />
+      </mesh>
+      {/* arms */}
+      {[-w / 2 + 0.1, w / 2 - 0.1].map((x) => (
+        <mesh key={x} position={[x, 0.4, 0]} castShadow>
+          <boxGeometry args={[0.18, 0.44, d]} />
+          <meshStandardMaterial color={color} roughness={0.9} />
+        </mesh>
+      ))}
+      {/* seat cushion */}
+      <mesh position={[0, 0.42, 0.02]}>
+        <boxGeometry args={[w - 0.3, 0.14, d - 0.28]} />
+        <meshStandardMaterial color={color === "#3a3f52" ? "#454b60" : "#4a3a52"} roughness={1} />
+      </mesh>
+    </group>
+  );
+}
+
 export function Rug({ position, size = [3, 2], color = "#5a2140", rotation = 0 }: { position: Vec3; size?: [number, number]; color?: string; rotation?: number }) {
   return (
     <mesh position={position} rotation={[-Math.PI / 2, 0, rotation]} receiveShadow>

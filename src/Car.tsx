@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useState } from "react";
 import { Html } from "@react-three/drei";
-import * as THREE from "three";
 import { GLBModel } from "./Vehicle";
 import { ProjectPopup } from "./ProjectPopup";
 import { makePuddleAlpha } from "./textures";
@@ -10,8 +8,8 @@ import type { CarSlot } from "./layout";
 const CAR_LENGTH = 4.3;
 
 // A clickable project car (real .glb model) parked inside the garage. A neon
-// underglow plane gives hover/active feedback since the model has fixed
-// materials. Interaction is only live once the camera is at the entrance.
+// underglow plane under the car gives hover/active feedback (the model itself
+// has fixed materials); clicking pans the camera in. Live only at the entrance.
 export function Car({
   slot,
   active,
@@ -24,7 +22,6 @@ export function Car({
   onSelect: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const lift = useRef<THREE.Group>(null);
   const glowAlpha = useMemo(() => makePuddleAlpha(), []);
 
   useEffect(() => {
@@ -33,20 +30,13 @@ export function Car({
     return () => void (document.body.style.cursor = "auto");
   }, [interactive, hovered]);
 
-  // Subtle rise when hovered (and not yet focused) to signal it's clickable.
-  useFrame(() => {
-    if (!lift.current) return;
-    const target = hovered && interactive && !active ? 0.14 : 0;
-    lift.current.position.y += (target - lift.current.position.y) * 0.15;
-  });
-
-  const accent = active ? "#ff4fd8" : hovered && interactive ? "#67e8f9" : "#3b4570";
-  const glow = active ? 2.6 : hovered && interactive ? 1.5 : 0.12;
+  const hot = interactive && hovered;
+  const accent = active ? "#ff4fd8" : hot ? "#67e8f9" : "#3b4570";
+  const glow = active ? 2.6 : hot ? 1.5 : 0.12;
 
   return (
     <group position={slot.position} rotation={[0, slot.facing, 0]}>
       <group
-        ref={lift}
         onClick={(e) => {
           if (!interactive) return;
           e.stopPropagation();
