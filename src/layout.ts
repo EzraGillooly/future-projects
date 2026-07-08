@@ -1,6 +1,10 @@
 import * as THREE from "three";
 import { PROJECTS, type Project } from "../data/projects";
 
+// World-x offset of the whole garage (exterior + interior + cars + poses). The
+// garage is authored around x=0; shift it here to move it left/right.
+export const GARAGE_X = -1.5;
+
 // --- Camera poses -----------------------------------------------------------
 // The whole journey runs on two saved poses. STREET: across the road at an
 // angle, taking in the shop. ENTRANCE: at the open garage door, looking in.
@@ -10,13 +14,13 @@ export interface CameraPose {
 }
 
 export const STREET: CameraPose = {
-  position: new THREE.Vector3(-12, 3.9, 16.8),
-  target: new THREE.Vector3(-4, 1.35, -2),
+  position: new THREE.Vector3(-12, 3.1, 15),
+  target: new THREE.Vector3(-4, 2.1, -2),
 };
 
 export const ENTRANCE: CameraPose = {
-  position: new THREE.Vector3(0, 1.9, 3.2),
-  target: new THREE.Vector3(0, 1.2, -12),
+  position: new THREE.Vector3(GARAGE_X, 1.9, 3.2),
+  target: new THREE.Vector3(GARAGE_X, 1.2, -12),
 };
 
 // --- Interior project cars --------------------------------------------------
@@ -53,7 +57,7 @@ const WALL_PARK = 3.5; // |x| of a parked car's centre
 export function buildCarSlots(): CarSlot[] {
   return PROJECTS.map((project, i) => {
     const { side, z } = CAR_SPOTS[i % CAR_SPOTS.length];
-    const x = side * WALL_PARK;
+    const x = GARAGE_X + side * WALL_PARK;
     const facing = side === -1 ? 0 : Math.PI; // nose toward the aisle
     const dir = -side; // +1 for left car (nose +X), -1 for right car (nose -X)
     // Camera glides to a spot out in the aisle, in front of the nose and raised,
@@ -82,3 +86,20 @@ export interface Decor {
 
 // Street set-dressing vehicles (empty for now — focusing on scene structure).
 export const STREET_CARS: Decor[] = [];
+
+// --- Rain puddles -----------------------------------------------------------
+// Reflective puddles where rain visibly pools in low spots on the road. Shared
+// so the puddle meshes and the splash system (heavier ripples here) agree on
+// where the water is. `scale` is the ellipse radius in X / Z.
+export interface Puddle {
+  position: [number, number, number];
+  scale: [number, number];
+  rotation: number;
+  seed: number;
+}
+
+export const STREET_PUDDLES: Puddle[] = [
+  { position: [-8, -0.01, 3.7], scale: [2.9, 1.7], rotation: 0.2, seed: 5 },
+  { position: [6.5, -0.01, 8.0], scale: [3.3, 2.0], rotation: -0.35, seed: 2 },
+  { position: [-1, -0.01, 6.3], scale: [2.3, 1.4], rotation: 0.5, seed: 8 },
+];

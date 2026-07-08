@@ -2,36 +2,51 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-// Cheap night rain: streaks (short vertical line segments) falling over the
-// street, wrapping at the ground. Low count so it stays fast on mobile.
-const COUNT = 650;
+// Night rain: short streaks falling over the street, wrapping at the ground.
+// Streak LENGTH scales with per-drop speed (faster drops read as longer, faster
+// streaks), each leans slightly with the wind, and brightness varies by depth
+// so near rain reads heavier than far. Low count so it stays fast on mobile.
+const COUNT = 700;
 const AREA_X = 46;
 const AREA_Z = 46;
 const TOP = 17;
 const SPEED = 26;
-const STREAK = 0.55;
+const WIND = 0.12; // horizontal lean as a fraction of streak length
 
 export function Rain() {
   const ref = useRef<THREE.LineSegments>(null);
 
-  const { positions, speeds } = useMemo(() => {
+  const { positions, colors, speeds, lengths } = useMemo(() => {
     const positions = new Float32Array(COUNT * 2 * 3);
+    const colors = new Float32Array(COUNT * 2 * 3);
     const speeds = new Float32Array(COUNT);
+    const lengths = new Float32Array(COUNT);
+    const tint = new THREE.Color("#aec4ff");
     for (let i = 0; i < COUNT; i++) {
       const x = (Math.random() - 0.5) * AREA_X;
       const y = Math.random() * TOP;
       const z = (Math.random() - 0.5) * AREA_Z + 2;
-      // top vertex
-      positions[i * 6] = x;
-      positions[i * 6 + 1] = y + STREAK;
+      // wider speed range so drops visibly fall at different rates
+      const sp = 0.5 + Math.random() * 1.3;
+      const len = 0.3 + sp * 0.5; // faster => longer streak (motion blur)
+      speeds[i] = sp;
+      lengths[i] = len;
+      // top vertex (leaned along wind), bottom vertex
+      positions[i * 6] = x + WIND * len;
+      positions[i * 6 + 1] = y + len;
       positions[i * 6 + 2] = z;
-      // bottom vertex
       positions[i * 6 + 3] = x;
       positions[i * 6 + 4] = y;
       positions[i * 6 + 5] = z;
-      speeds[i] = 0.7 + Math.random() * 0.7;
+      // depth-ish brightness: dimmer streaks recede
+      const b = 0.35 + Math.random() * 0.65;
+      for (const v of [0, 1]) {
+        colors[i * 6 + v * 3] = tint.r * b;
+        colors[i * 6 + v * 3 + 1] = tint.g * b;
+        colors[i * 6 + v * 3 + 2] = tint.b * b;
+      }
     }
-    return { positions, speeds };
+    return { positions, colors, speeds, lengths };
   }, []);
 
   useFrame((_, delta) => {
@@ -44,7 +59,7 @@ export function Rain() {
       arr[i * 6 + 1] -= drop;
       arr[i * 6 + 4] -= drop;
       if (arr[i * 6 + 4] < 0) {
-        arr[i * 6 + 1] = TOP + STREAK;
+        arr[i * 6 + 1] = TOP + lengths[i];
         arr[i * 6 + 4] = TOP;
       }
     }
@@ -55,8 +70,9 @@ export function Rain() {
     <lineSegments ref={ref}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
-      <lineBasicMaterial color="#aec4ff" transparent opacity={0.32} depthWrite={false} />
+      <lineBasicMaterial vertexColors transparent opacity={0.4} depthWrite={false} />
     </lineSegments>
   );
 }

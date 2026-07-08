@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { MeshReflectorMaterial, Environment, Lightformer } from "@react-three/drei";
+import { MeshReflectorMaterial, Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { STREET, ENTRANCE, buildCarSlots, STREET_CARS, type CameraPose, type CarSlot } from "./layout";
@@ -30,6 +30,7 @@ function Scene({
   cars,
   view,
   activeCar,
+  freeCam,
   onEnter,
   onSelect,
   onBack,
@@ -37,6 +38,7 @@ function Scene({
   cars: CarSlot[];
   view: View;
   activeCar: CarSlot | null;
+  freeCam: boolean;
   onEnter: () => void;
   onSelect: (id: string) => void;
   onBack: () => void;
@@ -51,7 +53,7 @@ function Scene({
 
   return (
     <>
-      <CameraRig pose={pose} />
+      {freeCam ? <OrbitControls makeDefault /> : <CameraRig pose={pose} />}
 
       {/* Self-contained night environment: reflects in the cars' metal without
           any external HDRI. Dim blue sky + warm door glow + neon strips. */}
@@ -77,16 +79,16 @@ function Scene({
         <planeGeometry args={[60, 60]} />
         <MeshReflectorMaterial
           resolution={1024}
-          mirror={0.4}
-          mixStrength={1.1}
-          blur={[300, 90]}
-          roughness={0.9}
+          mirror={0.12}
+          mixStrength={0.4}
+          blur={[400, 120]}
+          roughness={0.96}
           depthScale={1}
           minDepthThreshold={0.4}
           maxDepthThreshold={1.2}
           map={road}
-          color="#3a3d48"
-          metalness={0.55}
+          color="#eef1f5"
+          metalness={0.2}
         />
       </mesh>
 
@@ -106,7 +108,7 @@ function Scene({
           heading right (+X) keeps the far lane (garage side), and one heading
           left (-X) keeps the near lane (camera side). */}
       <PassingCar url="/models/nissan-gtr.glb" z={4.3} speed={10} from={-32} to={32} />
-      <PassingCar url="/models/nissan-180sx.glb" z={7.8} speed={7} from={34} to={-34} />
+      <PassingCar url="/models/nissan-180sx.glb" z={7} speed={7} from={34} to={-34} />
 
       {cars.map((slot) => (
         <Car
@@ -175,6 +177,7 @@ export function App() {
   const cars = useMemo(buildCarSlots, []);
   const [view, setView] = useState<View>("street");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [freeCam, setFreeCam] = useState(false);
   const activeCar = cars.find((c) => c.project.id === activeId) ?? null;
 
   const backOut = () => {
@@ -185,6 +188,8 @@ export function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") backOut();
+      // Free-camera inspect mode: drag to orbit, scroll to zoom, right-drag to pan
+      if (e.key === "c" || e.key === "C") setFreeCam((f) => !f);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -207,11 +212,32 @@ export function App() {
           cars={cars}
           view={view}
           activeCar={activeCar}
+          freeCam={freeCam}
           onEnter={() => setView("entrance")}
           onSelect={setActiveId}
           onBack={backOut}
         />
       </Canvas>
+      {freeCam && (
+        <div
+          style={{
+            position: "fixed",
+            top: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            padding: "7px 14px",
+            borderRadius: 999,
+            background: "rgba(10,12,24,0.6)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(143,214,255,0.35)",
+            color: "#dfe8ff",
+            font: "500 12px system-ui, sans-serif",
+            letterSpacing: "0.02em",
+          }}
+        >
+          Free camera — drag to orbit, scroll to zoom · press C to exit
+        </div>
+      )}
       {canGoBack && (
         <BackHint label={activeId ? "Back to garage" : "Back to street"} onClick={backOut} />
       )}

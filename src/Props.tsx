@@ -12,20 +12,22 @@ export function Puddle({
   position,
   scale = [1, 1],
   rotation = 0,
+  seed = 1,
 }: {
   position: Vec3;
   scale?: [number, number];
   rotation?: number;
+  seed?: number;
 }) {
-  const alpha = useMemo(() => makePuddleAlpha(), []);
+  const alpha = useMemo(() => makePuddleAlpha(seed), [seed]);
   return (
     <mesh position={position} rotation={[-Math.PI / 2, 0, rotation]} scale={[scale[0], scale[1], 1]}>
-      <circleGeometry args={[1, 24]} />
+      <circleGeometry args={[1, 32]} />
       <meshStandardMaterial
-        color="#090c15"
-        metalness={1}
-        roughness={0.08}
-        envMapIntensity={2.2}
+        color="#0b0f18"
+        metalness={0.9}
+        roughness={0.2}
+        envMapIntensity={1.5}
         alphaMap={alpha}
         transparent
         depthWrite={false}
@@ -91,6 +93,51 @@ export function TrashCan({ position }: { position: Vec3 }) {
         <cylinderGeometry args={[0.33, 0.33, 0.1, 12]} />
         <meshStandardMaterial color="#2a3f4a" metalness={0.4} roughness={0.6} />
       </mesh>
+    </group>
+  );
+}
+
+// A Japanese U-shaped roadside gutter (側溝): a concrete channel running along
+// the road edge with a recessed dark trough. Runs the length in X at `z`.
+export function Gutter({ z, length = 60 }: { z: number; length?: number }) {
+  return (
+    <group position={[0, 0, z]}>
+      {/* concrete frame, barely proud of the road (just enough to notice) */}
+      <mesh position={[0, 0.01, 0]} receiveShadow>
+        <boxGeometry args={[length, 0.02, 0.55]} />
+        <meshStandardMaterial color="#43464e" roughness={0.96} metalness={0} />
+      </mesh>
+      {/* shallow recessed dark trough */}
+      <mesh position={[0, 0.007, 0]}>
+        <boxGeometry args={[length, 0.022, 0.3]} />
+        <meshStandardMaterial color="#0a0c10" roughness={1} />
+      </mesh>
+    </group>
+  );
+}
+
+// A storm drain embedded flush in the ground: a dark recess with metal bars
+// nearly level with the surface. Place at the ground surface (y ~ 0).
+export function StormDrain({ position, rotation = 0 }: { position: Vec3; rotation?: number }) {
+  return (
+    <group position={position} rotation={[0, rotation, 0]}>
+      {/* frame flush with the road */}
+      <mesh position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[1.5, 0.85]} />
+        <meshStandardMaterial color="#2a2e37" metalness={0.3} roughness={0.85} polygonOffset polygonOffsetFactor={-1} />
+      </mesh>
+      {/* dark interior seen between the bars */}
+      <mesh position={[0, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[1.26, 0.62]} />
+        <meshStandardMaterial color="#050609" roughness={1} polygonOffset polygonOffsetFactor={-2} />
+      </mesh>
+      {/* flush grate bars, barely proud of the surface */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <mesh key={i} position={[-0.56 + i * 0.16, 0.018, 0]}>
+          <boxGeometry args={[0.07, 0.028, 0.62]} />
+          <meshStandardMaterial color="#3b414d" metalness={0.6} roughness={0.5} />
+        </mesh>
+      ))}
     </group>
   );
 }
